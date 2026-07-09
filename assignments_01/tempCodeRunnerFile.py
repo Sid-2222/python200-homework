@@ -1,27 +1,44 @@
 import pandas as pd
 import numpy as np
-arr = np.array([12.0, 15.0, np.nan, 14.0, 10.0, np.nan, 18.0, 14.0, 16.0, 22.0, np.nan, 13.0])
+import matplotlib.pyplot as plt
+import statistics as sat
+from scipy import stats
+from scipy.stats import pearsonr
+import seaborn as sns
 
-def create_series(arr):
-    return pd.Series(arr, name= "values")
+ # --- Pandas ---
+ 
+# Pandas Q1)
+ 
+data = {
+    "name":   ["Alice", "Bob", "Carol", "David", "Eve"],
+    "grade":  [85, 72, 90, 68, 95],
+    "city":   ["Boston", "Austin", "Boston", "Denver", "Austin"],
+    "passed": [True, True, True, False, True]
+}
+df = pd.DataFrame(data)
+print(df.head(3))
+print("Shape:", df.shape)
+print("Data Type:", df.dtypes)
 
-def clean_data(series):
-    return series.dropna()
+# Pandas Q2)
+grade_above_80 = df[ (df["passed"] == True ) &  (df["grade"] > 80)]
+print(grade_above_80)
 
-def summarize_data(series):
-    return {
-        "mean" : series.mean(),
-        "median": series.median(),
-        "std" : series.std(),
-        "mode" : series.mode()[0]
-    }
-def data_pipeline(arr):
-    series = create_series(arr)
-    clear_series = clean_data(series)
-    final_summary = summarize_data(clear_series)
-    return final_summary
+# Pandas Q3)
 
-pipe = data_pipeline(arr)
+df["grade_curved"] = df["grade"] + 5
+print(df)
 
-for key, value in pipe.items():
-    print(f"{key}: {value}")
+# Pandas Q4)
+
+df["name_upper"] = df["name"].str.upper()
+print(df[["name", "name_upper"]])
+
+# Pandas Q5)
+by_city = df.groupby(["city"])["grade"].mean()
+print(by_city)
+
+# Pandas Q6)
+df["city"] = df["city"].replace("Austin", "Houston")
+print(df[["name", "city"]])

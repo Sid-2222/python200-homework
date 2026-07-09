@@ -26,7 +26,6 @@ files = [
 ]
 
 
-
 @task(retries=3 , retry_delay_seconds=2)
 def load_data(files):
     logger = get_run_logger()

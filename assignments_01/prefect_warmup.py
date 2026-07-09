@@ -23,16 +23,25 @@ def summarize_data(series):
     }
  
 @flow    
-def pipeline_flow(arr):
+def pipeline_flow():
     series = create_series(arr)
     clear_series = clean_data(series)
     final_summary = summarize_data(clear_series)
     return final_summary
 
 if __name__ == "__main__":
-    result = pipeline_flow(arr)
+    result = pipeline_flow()
     for key , value in result.items():
         print(f"{key}: {value}")
         
-# Q1. Yes here its a simple example to introduce prefect but there are more powerful thing prefect can do so the introduction is needed.
-# Q2. A real life case can be getting daily sales report and schedule it to run every morning
+# Prefect Reflection Questions
+#
+# Q1. Prefect adds some overhead compared to running normal Python functions because
+# it needs to track tasks, manage execution states, store logs, and provide workflow
+# features. However, this extra overhead is useful for larger data pipelines because
+# it makes workflows easier to monitor, debug, retry, and maintain.
+#
+# Q2. A realistic use case for Prefect would be an automated daily business reporting
+# pipeline. For example, a company could schedule a workflow that collects sales data,
+# cleans and validates the data, calculates important metrics, and generates a report
+# every morning. Prefect would help track each step and handle failures automatically.
