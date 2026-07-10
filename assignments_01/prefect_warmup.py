@@ -21,18 +21,21 @@ def summarize_data(series):
         "std" : series.std(),
         "mode" : series.mode()[0]
     }
- 
+@task
+def show_result(final_summary):
+     for key , value in final_summary.items():
+        print(f"{key}: {value}")
 @flow    
 def pipeline_flow():
     series = create_series(arr)
     clear_series = clean_data(series)
     final_summary = summarize_data(clear_series)
+    show_result(final_summary)
     return final_summary
 
 if __name__ == "__main__":
-    result = pipeline_flow()
-    for key , value in result.items():
-        print(f"{key}: {value}")
+    pipeline_flow()
+    
         
 # Prefect Reflection Questions
 #

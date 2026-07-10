@@ -280,11 +280,11 @@ def make_report(merged_data, pandemic_result,correlation_result):
     
     logger.info("Top 3 happiest regions by average")
     for region , score in top_3.items():
-       logger.info(f" {region} -> {score}") 
+       logger.info(f"The region name is -> {region} and the score is -> {score}") 
     
     logger.info("Bottom 3 happiest regions by average")
     for region , score in bottom_3.items():
-       logger.info(f" {region} -> {score}")
+       logger.info(f"The region name is -> {region} and the score is -> {score}")
 
     if pandemic_result["p_value"] < 0.05:
         interpretation = (

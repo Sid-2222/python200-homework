@@ -320,6 +320,7 @@ plt.show()
 
 # --- Pipeline ---
 #Pipeline Question 1)
+
 import pandas as pd
 import numpy as np
 arr = np.array([12.0, 15.0, np.nan, 14.0, 10.0, np.nan, 18.0, 14.0, 16.0, 22.0, np.nan, 13.0])
