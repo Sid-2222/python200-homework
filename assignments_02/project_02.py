@@ -14,7 +14,7 @@ import seaborn as sns
 
 # Task 1: Load and Explore
 
-df = pd.read_csv("outputs/student_performance_math.csv", sep=";")
+df = pd.read_csv("student_performance_math.csv", sep=";")
 
 print("Shape of dataset: (Rows, Columns) ", df.shape)
 print("\nFirst five rows:")
@@ -24,8 +24,8 @@ print(df.dtypes)
 
 plt.hist(df["G3"], bins=21, color="green", rwidth=0.8, edgecolor="black")
 plt.title("Distribution of Final Math Grades")
-plt.xlabel("Final grade G3")
-plt.ylabel("Number of student")
+plt.xlabel("Final Grade")
+plt.ylabel("Number of students")
 plt.savefig("outputs/g3_distribution.png")
 plt.show()
 
@@ -64,11 +64,12 @@ filtered_corr = df_filtered["absences"].corr(df_filtered["G3"], method="pearson"
 print(f"Original: {original_corr}")
 print(f"Filtered: {filtered_corr}")
 
-# Filtering changes the correlation because students with G3=0 are likely failing students.
-# In the original dataset, these students often had very low final grades regardless of their
-# number of absences, adding many points that weaken the relationship between absences and G3.
-# After removing G3=0 cases, the remaining students show a clearer pattern where higher
-# absences are associated with slightly lower final grades.
+# The original correlation between absences and G3 is very weak because the dataset
+# includes students with G3 = 0. These students typically did not take the final exam,
+# so their final grade is zero regardless of how many absences they had. Those records
+# weaken the relationship between absences and final grades. After removing the G3 = 0
+# students, the correlation becomes more negative, showing that among students who
+# completed the course, having more absences is associated with lower final grades.
 
 # Original data
 plt.scatter(df["absences"], df["G3"])
@@ -89,8 +90,13 @@ corr_with_g3 = df_filtered.corr(method="pearson")["G3"].drop("G3").sort_values()
 print("Correlation between each numeric feature and G3")
 print(corr_with_g3)
 
-# The G2 feature has the strongest relationship with G3 with the value 0.965583
-# The surprising result is the relationship between G3 and failures is the lowest value -0.293831
+# G2 has the strongest positive correlation with G3 (0.965583), which is expected
+# because the second-period grade is closely related to the final grade.
+# The strongest negative correlation is failures (-0.293831), showing that students
+# with more past failures generally earn lower final grades.
+# One surprising result is that absences have only a moderate negative correlation
+# (-0.213129), suggesting that attendance alone is not as strong a predictor of
+# final grades as previous academic performance.
 
 plt.figure(figsize=(8, 6))
 
@@ -107,8 +113,9 @@ plt.savefig("outputs/g2_vs_g3.png", bbox_inches="tight")
 plt.show()
 plt.close()
 
-# From the Scatter plot we can see a consistant positive correlation between G2 and G3
-# From that we can predict a student who scored high will most likely to score high in G3 too
+# The scatter plot shows a strong positive linear relationship between G2 and G3.
+# Students who earn higher second-period grades generally earn higher final grades,
+# with relatively little scatter around the overall trend.
 
 plt.figure(figsize=(8, 6))
 
@@ -125,10 +132,12 @@ plt.savefig("outputs/failures_vs_g3.png", bbox_inches="tight")
 plt.show()
 plt.close()
 
-# from this box plot we can see students with 0 past failures got the highest number and also with the highest mean 
-# students with 1 past failures performed little less than students with 0 past failures
-# students with 2 past failures performed little less than students with 1 past failures but there are students
-# who performed well because we can see some outliers
+
+# The box plot shows that students with no previous failures generally have the
+# highest final grades. As the number of past failures increases, the median G3
+# decreases. There are a few high-performing outliers among students with multiple
+# failures, but the overall trend suggests that previous failures are associated
+# with lower final grades.
 
 
 # Task 4: Baseline Model )
@@ -147,15 +156,17 @@ r2 = model.score(X_test, y_test)
 print("RMSE:", rmse)
 print("R2 on the Filtered Dataset:", r2)
 
-# The slope -1.4275 tells us that the model predict -1.4275 less number with every past failures
-# The RSME tells us the model's prediction is off on avarage by 2.961737
-# The R² value is 0.08949 which is less than my expectation that means predicting G3 only 
-# based on failures isnt enough there are more factors that comes into factors
+# The slope of -1.4275 means that for each additional past failure, the model predicts
+# a student's final grade (G3) will decrease by about 1.43 points on the 0-20 grading scale.
+# The RMSE of 2.96 means the model's predictions are off by about 2.96 grade points on average.
+# The R² value of 0.0895 means that failures alone explain only about 9% of the variation
+# in final grades, so other factors also influence student performance.
 
 # Task 5: Build the Full Model )
 
-feature_cols = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup",
-                "internet", "sex", "freetime", "activities", "traveltime"]
+feature_cols = ["age", "Medu", "Fedu", "traveltime", "studytime", "failures",
+                "absences", "freetime", "goout", "Walc", "schoolsup",
+                "internet", "higher", "activities", "sex"]
 X = df_filtered[feature_cols].values
 y = df_filtered["G3"].values
 
@@ -176,22 +187,22 @@ print("Train R²:", train_r2)
 print("Test R²:", test_r2)
 print("RMSE:", rmse)
 
-# The full model performed better than the baseline model. The Test R² increased from 0.0895 to 0.1539,
-# and the RMSE decreased from 2.9617 to 2.8550. This shows that using more features helps predict 
+# The full model performed better than the baseline model. The Test R² increased from 0.0895 to 0.2634,
+# and the RMSE decreased from 2.9617 to 2.6639. This shows that using more features helps predict 
 # students' final grades more accurately than using only past failures.
 
 print("Feature Coefficients")
 for name, coef in zip(feature_cols, full_model.coef_):
     print(f"{name:12s}: {coef:+.3f}")
 
-# After looking at the data the surprising value is schoolsup : -2.062 which have a negative value shows a negative relation
+# After looking at the data the surprising value is schoolsup : -2.263 which have a negative value shows a negative relation
 # Which shows there is no relationship between a student getting Extra educational support from the school will do well in G3
 
-# Comparing train R² (0.1749) and test R² (0.1539), the values are close.
+# Comparing train R² (0.2346) and test R² (0.2634), the values are close.
 # This means the model performs similarly on unseen data.
 
 # If deploying this model, I would keep features with stronger effects such as failures,
-# higher, internet, studytime, and schoolsup because they provide more useful information.
+# internet, studytime, and schoolsup because they provide more useful information.
 
 # I would consider dropping activities and freetime because their coefficients are close to
 # zero and they add little value to the prediction.
@@ -212,14 +223,14 @@ plt.close()
 # The filtered dataset contains 357 students, and the test set contains about 72 students
 # (20% of the filtered dataset).
 
-# The full model achieved a Test R² of 0.1539 and an RMSE of 2.8550.
+# The full model achieved a Test R² of 0.2634 and an RMSE of 2.6639.
 # On a 0-20 grade scale, this means the model's predictions are usually off by about
-# 2.86 points from the actual value. The R² value means the model correctly worked about 15% in
+# 2.66 points from the actual value. The R² value means the model correctly worked about 26% in
 # students' final grades, so there are still other factors affceting performance.
 
-# Internet has the largest positive effect +0.834, meaning students with internet
+# Internet has the largest positive effect +1.037, meaning students with internet
 # usually get higher final grades. School support has the largest negative
-# effect -2.062, which is surprising.
+# effect -2.263, which is surprising.
 
 # One surprising result was that school support had a negative effect.
 # I expected it to help students, but it may be because students who
@@ -227,8 +238,9 @@ plt.close()
 
 # Neglected Feature: The Power of G1
 
-feature_cols_G1 = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup",
-                "internet", "sex", "freetime", "activities", "traveltime","G1"]
+feature_cols_G1 = ["age", "Medu", "Fedu", "traveltime", "studytime", "failures",
+                "absences", "freetime", "goout", "Walc", "schoolsup",
+                "internet", "higher", "activities", "sex","G1"]
 X = df_filtered[feature_cols_G1].values
 y = df_filtered["G3"].values
 
