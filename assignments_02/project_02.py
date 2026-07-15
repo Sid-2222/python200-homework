@@ -42,20 +42,11 @@ print("Rows removed:", df.shape[0] - df_filtered.shape[0])
 
 # converting the yes/no columns to 1/0 and the sex column to 0/1
 
-df_filtered.loc[df_filtered["schoolsup"] == "yes", "schoolsup"] = 1
-df_filtered.loc[df_filtered["schoolsup"] == "no", "schoolsup"] = 0
-
-df_filtered.loc[df_filtered["internet"] == "yes", "internet"] = 1
-df_filtered.loc[df_filtered["internet"] == "no", "internet"] = 0
-
-df_filtered.loc[df_filtered["higher"] == "yes", "higher"] = 1
-df_filtered.loc[df_filtered["higher"] == "no", "higher"] = 0
-
-df_filtered.loc[df_filtered["activities"] == "yes", "activities"] = 1
-df_filtered.loc[df_filtered["activities"] == "no", "activities"] = 0
-
-df_filtered.loc[df_filtered["sex"] == "M", "sex"] = 1
-df_filtered.loc[df_filtered["sex"] == "F", "sex"] = 0
+df_filtered["schoolsup"] = df_filtered["schoolsup"].map({"yes": 1, "no": 0}).astype(int)
+df_filtered["internet"] = df_filtered["internet"].map({"yes": 1, "no": 0}).astype(int)
+df_filtered["higher"] = df_filtered["higher"].map({"yes": 1, "no": 0}).astype(int)
+df_filtered["activities"] = df_filtered["activities"].map({"yes": 1, "no": 0}).astype(int)
+df_filtered["sex"] = df_filtered["sex"].map({"M": 1, "F": 0}).astype(int)
 
 original_corr = df["absences"].corr(df["G3"], method="pearson")
 filtered_corr = df_filtered["absences"].corr(df_filtered["G3"], method="pearson")
@@ -224,17 +215,23 @@ plt.close()
 # (20% of the filtered dataset).
 
 # The full model achieved a Test R² of 0.2634 and an RMSE of 2.6639.
-# On a 0-20 grade scale, this means the model's predictions are usually off by about
-# 2.66 points from the actual value. The R² value means the model correctly worked about 26% in
-# students' final grades, so there are still other factors affceting performance.
+# On a 0–20 grade scale, this means the model's predictions are usually off by about
+# 2.66 points. The R² value of 0.2634 means the model explains about 26% of the
+# variation in students' final grades, so other factors also affect performance.
 
-# Internet has the largest positive effect +1.037, meaning students with internet
-# usually get higher final grades. School support has the largest negative
-# effect -2.263, which is surprising.
+# Internet has the largest positive coefficient (+1.037), meaning that, after
+# accounting for the other variables in the model, students with internet access
+# tend to have higher predicted final grades. The second largest positive
+# coefficient is sex (+0.402).
 
-# One surprising result was that school support had a negative effect.
-# I expected it to help students, but it may be because students who
-# receive extra support are already struggling in school.
+# School support has the largest negative coefficient (-2.263), followed by
+# failures (-0.800).
+
+# One surprising result was that school support had a negative coefficient.
+# This does not mean school support causes lower grades. Instead, after
+# accounting for the other variables in the model, students receiving school
+# support tended to have lower predicted grades, possibly because they were
+# already struggling academically.
 
 # Neglected Feature: The Power of G1
 
@@ -260,14 +257,15 @@ print("\nTask 6 Full Model with G1")
 print("With G1 Test R²:", test_r2)
 print("With G1 RMSE:", rmse)
 
-# A high R² does not mean G1 causes G3. It only means G1 is strongly positivly related
-# to G3 because students who do well in the first period often do well in the
-# final exam.
+# A high R² does not mean G1 causes G3. It only means G1 is strongly
+# positively associated with G3 because students who perform well in the
+# first grading period also tend to perform well on the final exam.
 
-#  Yes, this model is useful for identifying students who may struggle because G1
-# is a strong predictor of the final grade.
+# Yes, this model is useful for identifying students who may struggle because
+# G1 is a strong predictor of the final grade (G3).
 
-# If the educators want to help students before G1 is available, they would need
-# to use other information such as past failures, study time, attendance,
-# parental education, and school support to predict which students may need
-# extra help earlier so students can perform good in G1 so they can perform good in G3 as well.
+# If educators want to identify at-risk students before G1 is available,
+# they would need to rely on other features such as previous failures,
+# study time, attendance (absences), parental education, school support,
+# and other background information to predict which students may need
+# extra help early in the school year.
