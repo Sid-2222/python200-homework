@@ -21,8 +21,8 @@ y_predicted = model.predict(new_value)
 
 print(f"Slope: {model.coef_[0]:,.5f}")
 print(f"Intercept: {model.intercept_:,.5f}")
-print(f"Predicted salary for 4 years of experience: ${y_predicted[0]:,.2f}")
-print(f"Predicted salary for 8 years of experience: ${y_predicted[1]:,.2f}")
+print(f"Predicted salary for 4 years of experience = ${y_predicted[0]:,.2f}")
+print(f"Predicted salary for 8 years of experience = ${y_predicted[1]:,.2f}")
 
 # scikit-learn Question 2
 
