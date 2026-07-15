@@ -1,4 +1,4 @@
-# From watching the raw dataset i noticed fields are separated by ";"
+# From watching the raw dataset, I noticed fields are separated by ";"
 # so we will use sep=";" when reading it with pd.read_csv().
 
 
@@ -215,23 +215,30 @@ plt.close()
 # (20% of the filtered dataset).
 
 # The full model achieved a Test R² of 0.2634 and an RMSE of 2.6639.
-# On a 0–20 grade scale, this means the model's predictions are usually off by about
-# 2.66 points. The R² value of 0.2634 means the model explains about 26% of the
-# variation in students' final grades, so other factors also affect performance.
+# On a 0–20 grade scale, this means the model's predictions are typically off by
+# about 2.66 points from the actual final grade. The R² value of 0.2634 means the
+# model explains about 26% of the variation in final grades, so many other factors
+# also influence student performance.
 
-# Internet has the largest positive coefficient (+1.037), meaning that, after
-# accounting for the other variables in the model, students with internet access
-# tend to have higher predicted final grades. The second largest positive
-# coefficient is sex (+0.402).
+# In the predicted vs actual plot, points close to the diagonal line represent
+# accurate predictions. Points above the diagonal mean the model underestimated
+# the student's grade, while points below the diagonal mean the model overestimated
+# the student's grade. The errors appear to be roughly spread across grade levels,
+# although predictions may be less accurate at some higher or lower grade ranges.
 
-# School support has the largest negative coefficient (-2.263), followed by
-# failures (-0.800).
+# The two largest positive coefficients are internet (+1.037) and sex (+0.402).
+# This means that, after accounting for the other features in the model, these
+# variables are associated with higher predicted final grades.
 
-# One surprising result was that school support had a negative coefficient.
-# This does not mean school support causes lower grades. Instead, after
-# accounting for the other variables in the model, students receiving school
-# support tended to have lower predicted grades, possibly because they were
-# already struggling academically.
+# The two largest negative coefficients are schoolsup (-2.263) and failures (-0.800).
+# This means that, after accounting for the other features in the model, these
+# variables are associated with lower predicted final grades.
+
+# One surprising result was that schoolsup had the largest negative coefficient.
+# This does not mean that school support causes lower grades. Instead, it may show
+# that students receiving extra support were already struggling academically, which
+# creates a negative adjusted relationship in the regression model.
+
 
 # Neglected Feature: The Power of G1
 
@@ -257,15 +264,19 @@ print("\nTask 6 Full Model with G1")
 print("With G1 Test R²:", test_r2)
 print("With G1 RMSE:", rmse)
 
-# A high R² does not mean G1 causes G3. It only means G1 is strongly
-# positively associated with G3 because students who perform well in the
-# first grading period also tend to perform well on the final exam.
+# A high R² does not mean G1 causes G3. It only means G1 has a strong
+# predictive relationship with G3. Students who perform well during the first
+# grading period often continue to perform well on the final exam, but this
+# does not prove that improving G1 directly causes a higher G3.
 
-# Yes, this model is useful for identifying students who may struggle because
-# G1 is a strong predictor of the final grade (G3).
+# This model is useful for identifying students who may struggle because G1 is
+# a strong predictor of the final grade. Educators can use early grading
+# information to identify students who may need additional support before the
+# end of the course.
 
-# If educators want to identify at-risk students before G1 is available,
-# they would need to rely on other features such as previous failures,
-# study time, attendance (absences), parental education, school support,
-# and other background information to predict which students may need
-# extra help early in the school year.
+# However, if educators need to identify at-risk students before G1 is available,
+# they would need to use other information such as previous failures, study time,
+# attendance (absences), parental education, school support, internet access,
+# and other student background factors. These features can help predict which
+# students may need early intervention before their first grading period score
+# is known.
