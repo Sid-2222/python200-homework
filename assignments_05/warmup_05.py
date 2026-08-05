@@ -38,9 +38,12 @@ for t in temperatures:
     print(f"\nResponse with Temperature {t}:")
     print(response.choices[0].message.content)
     
-# # I noticed that Response with Temperature 1.5 have 10 suggested names but other two have 1 response.
-# # it shows shows the flexiblity in high temperature
-# # If i needed a  consistent, reproducible output i will thake temperature 0 
+
+# I noticed that the responses changed as the temperature increased.
+# Temperature 0 gave the most consistent and predictable response, while
+# higher temperatures like 0.7 and 1.5 produced more variation and creativity
+# in the suggested names. For tasks where I need consistent and reproducible
+# output, I would use temperature 0 because it gives more stable results.
 
 
 # #-----------------------------API Question 3--------------------------
@@ -96,10 +99,17 @@ print("-" * 50)
 print(response.choices[0].message.content)
 
 
-messages_2=[{
-        "role": "system", "content": "You are a bad-tempered, rude, sarcastic, arrogant, impatient, and short-tempered boss. You use casual slang, give blunt answers, and act annoyed, but you still provide accurate information.",
-        "role": "user", "content": "I don't understand what a list comprehension is."
-        }]
+messages_2 = [
+    {
+        "role": "system",
+        "content": "You are a bad-tempered, rude, sarcastic, arrogant, impatient, and short-tempered boss. You use casual slang, give blunt answers, and act annoyed, but you still provide accurate information."
+    },
+    {
+        "role": "user",
+        "content": "I don't understand what a list comprehension is."
+    }
+]
+
 response = client.chat.completions.create(
     model="gpt-4o-mini",
     messages=messages_2,
@@ -221,7 +231,7 @@ for i, review in enumerate(reviews):
         ],
         n=1
     )
-    print(f"Review {i}: {response.choices[0].message.content}")
+    print(f"Review {i+1}: {response.choices[0].message.content}")
     
     
 # Zero-shot prompting gives only the task instructions and is useful when the task
@@ -273,18 +283,30 @@ review = "I've been using this tool for three months. It handles large datasets 
 but the UI is clunky and the export options are limited."
 
 response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "Analyze the review and return only valid JSON. "
-                      "The JSON must contain exactly these keys: "
-                      "sentiment, confidence, and reason. "
-                      "confidence must be a float between 0 and 1. "
-                      "reason must be one sentence."},
-            {"role": "user", "content": review}
-        ],
-        n=1
-    )
+    model="gpt-4o-mini",
+    messages=[
+        {
+            "role": "system",
+            "content": """
+            Analyze the review and return ONLY valid JSON.
+            Do not include any explanation, markdown, or extra text.
 
+            The JSON must contain exactly these keys:
+            - sentiment
+            - confidence
+            - reason
+
+            confidence must be a float between 0 and 1.
+            reason must be exactly one sentence.
+            """
+        },
+        {
+            "role": "user",
+            "content": review
+        }
+    ],
+    n=1
+)
 # Step 1: Print the raw model response
 
 raw_response = response.choices[0].message.content
@@ -293,6 +315,7 @@ print(raw_response)
 
 # Step 2: Parse the JSON response
 try:
+    
     result = json.loads(raw_response)
     print("\nParsed fields:")
     print("Sentiment:", result["sentiment"])
@@ -362,28 +385,38 @@ print(response.choices[0].message.content)
 
 response = client.chat.completions.create(
     model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "Explain what a large language model is in two sentences."}]
+    messages=[
+        {
+            "role": "user",
+            "content": "Explain what a large language model is in two sentences."
+        }
+    ]
 )
 
-print("Response:")
+print("OpenAI Response:")
 print(response.choices[0].message.content)
 
-"""""
-ollama output
+
+"""
+Ollama Output:
 
 A large language model is an artificial intelligence system trained on massive datasets to understand and generate
 human-like text, enabling tasks like writing, answering questions, or creating content. It processes vast amounts
 of information, understands context, and can generate coherent responses, making it highly versatile in various applications.
-"""""
+"""
 
-# Comparison:
-# The OpenAI and Ollama responses both explain what a large language model is
-# in two sentences and describe similar capabilities. The wording differs
-# slightly, but the meaning is essentially the same.
+
+
+# The OpenAI and Ollama responses both explain that large language models
+# are AI systems trained on large amounts of data to understand and generate
+# human-like text. The main difference is the wording and style of the responses,
+# but both provide the same general information. OpenAI may provide more
+# polished responses depending on the model, while Ollama allows models to run
+# locally on a user's computer.
 
 # Advantage of running a model locally with Ollama:
-# - No API costs or token usage, and your data stays on your machine.
+# - There are no API costs or token limits, and data can remain on the local machine.
 
 # Disadvantage of running a model locally with Ollama:
-# - Requires local computing resources and may be slower or less capable
-#   than larger cloud-hosted models.
+# - Local models require computer resources and may be slower or less accurate
+#   compared to larger cloud-based models.

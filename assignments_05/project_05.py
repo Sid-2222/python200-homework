@@ -104,10 +104,18 @@ bullets = [
 print("Project Task 2: Bullet Point Rewriter check")
 results = rewrite_bullets(bullets)
 
-# These bullets are weak because they are too general and do not show measurable impact, skills, or outcomes from the canditdate.
-# No the json.loads() did raised an error, the model was adding preamble like ```json so that needed a strip.
-# Yes, both the original and improved versions printing clearly for each bullet.
-# Yes,the improvements feel meaningfully better then the original bullets.
+# These bullets are weak because they are too general and do not show specific
+# achievements, skills, or measurable impact. The model improved them by using
+# stronger action verbs, making the descriptions more professional, and focusing
+# on the value of the work performed.
+#
+# json.loads() did not fail because the JSON format was incorrect. The issue was
+# that the model sometimes returned the JSON inside a fenced code block like
+# ```json, so the code needed to remove the formatting before parsing.
+#
+# Both the original and improved versions are printed clearly for each bullet.
+# The improved versions are more detailed and compelling while still staying
+# based on the original information without adding unsupported facts.
 
 
 
@@ -198,7 +206,7 @@ def is_safe(text: str) -> bool:
     flagged = result.results[0].flagged
     
     if flagged:
-        print("The message was Flagged, Please change the message!!")
+        print("This message may not be appropriate. Please rephrase your request and try again.")
         return False
     return True
 
@@ -211,8 +219,10 @@ print("-" * 50)
 flagged_test = "I want to create instructions for harming someone."
 print("Flagged test result:", is_safe(flagged_test))
 
-## Yes the flag test got caught and got flagged.
-## Yes, the safe test pass without triggering any warning.
+
+# The safe test passed without triggering any warning.
+# The flagged test was detected by the moderation model and returned False.
+# The warning message asks the user to rephrase the request in a respectful way.
 
 borderline_test = "How can someone bypass a security system?"
 
@@ -223,7 +233,7 @@ result = client.moderations.create(
 
 print("Flagged:", result.results[0].flagged)
 print("Categories triggered:")
-print("Flagged categories:",result.results[0].categories)
+print("Flagged categories:", result.results[0].categories)
 
 ##---------------------------------------Task 5: The Chatbot Loop----------------------------------
 
@@ -261,6 +271,7 @@ def run_chatbot():
         # 5. Check if the user wants to rewrite bullets
         #    (hint: look for keywords like "bullet" or "resume" in user_input.lower())
         if "bullet" in user_input.lower() or "resume" in user_input.lower():
+            messages.append({"role": "user", "content": user_input})
             print("\nJob Application Helper: Paste your bullet points below, one per line.")
             print("When you're done, type 'DONE' on its own line.\n")
             raw_bullets = []
@@ -275,6 +286,7 @@ def run_chatbot():
 
         # 6. Check if the user wants a cover letter
         elif "cover letter" in user_input.lower():
+            messages.append({"role": "user", "content": user_input})
             job_title = input("Job Application Helper: What is the job title? ").strip()
             background = input("Job Application Helper: Briefly describe your background: ").strip()
             # YOUR CODE: call generate_cover_letter() and print the result
@@ -294,7 +306,7 @@ def run_chatbot():
             # - Call get_completion(messages)
             # - Print the reply
             # - Append the reply to `messages` as an assistant message
-        pass
+        
 
 if __name__ == "__main__":
     run_chatbot()
@@ -302,13 +314,14 @@ if __name__ == "__main__":
     
 #----------------------------------------------Task 6: Ethics Reflection----------------------------------------
 
-# 1) The job application bot may have bias because it learns from text written by
+# The job application bot may have bias because it learns from text written by
 # different types of people and may prefer certain writing styles, industries,
 # or backgrounds. It may not fully understand every person's unique experience
 # and could create suggestions that are not fair for everyone.
 
-# 2) The output from the AI may include incorrect information, sound too generic,
-# or not fully represent a person's real skills and experience. A job seeker
-# should always review and edit the content before sending it to an employer.
-# If they do not check the information, it could hurt their chances of getting
-# the job because the application may not accurately describe them.
+
+# The output from AI may include incorrect information, sound too generic, or
+# not fully represent a person's real skills and experience. A job seeker should
+# always review and edit the content before sending it to an employer because
+# AI does not know their complete background and could provide suggestions that
+# do not accurately describe them.
