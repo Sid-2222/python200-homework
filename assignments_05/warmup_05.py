@@ -65,7 +65,6 @@ response = client.chat.completions.create(
     model="gpt-4o-mini",
     max_tokens=15, 
     messages=[{"role": "user", "content": "Explain how neural networks work."}],
-    n=3,
     temperature=1.0
 )
 print(" -"* 50)
@@ -81,24 +80,29 @@ print(response.choices[0].message.content)
 
 #-------------------------------System Question 1--------------------------------------
 
+messages = [
+    {"role": "system", "content": "You are a patient, encouraging Python tutor. You always explain things simply and end with a word of encouragement."},
+    {"role": "user", "content": "I don't understand what a list comprehension is."}
+]
+
 
 response = client.chat.completions.create(
     model="gpt-4o-mini",
-    messages=[{
-        "role": "system", "content": "You are a patient, encouraging Python tutor. You always explain things simply and end with a word of encouragement.",
-        "role": "user", "content": "I don't understand what a list comprehension is."
-        }],
+    messages=messages,
     n=1
 )
-print(" -"* 50)
+
+print("-" * 50)
 print(response.choices[0].message.content)
 
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{
+
+messages_2=[{
         "role": "system", "content": "You are a bad-tempered, rude, sarcastic, arrogant, impatient, and short-tempered boss. You use casual slang, give blunt answers, and act annoyed, but you still provide accurate information.",
         "role": "user", "content": "I don't understand what a list comprehension is."
-        }],
+        }]
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=messages_2,
     n=1
 )
 print(" -"* 50)
@@ -135,13 +139,21 @@ reviews = [
     "Great price, but the documentation is nearly impossible to follow."
 ]
 
-for i, review in enumerate(reviews):
+print("Prompt Question 1 — Zero-Shot")
+for i, review in enumerate(reviews, start=1):
     
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Classify the sentiment of the following review as positive, negative, or mixed. Respond with only the sentiment."},
-            {"role": "user", "content": review}
+            {
+                "role": "user",
+                "content": f"""
+                Classify the sentiment of the following review as positive, negative, or mixed.
+                Respond with only one word.
+
+                Review: "{review}"
+                """
+            }
         ],
         n=1
     )
@@ -151,21 +163,26 @@ for i, review in enumerate(reviews):
 # #-----------------------------------Prompt Question 2 — One-Shot---------------------------------
 
 print("\nPrompt Question 2 — One-Shot")
-for i, review in enumerate(reviews):
+for i, review in enumerate(reviews, start=1):
     
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Classify the sentiment of the following review as positive, negative, or mixed. Respond with only the sentiment."},
-            {"role": "user",
-             "content": f"""
-              Example:
-              Review: "Fast shipping but the item arrived damaged."
-              Sentiment: mixed
-              Now classify this review:
-              Review: "{review}"
-              Sentiment:
-             """}
+            {
+                "role": "user",
+                "content": f"""
+                Classify the sentiment of each review as positive, negative, or mixed.
+
+                Example:
+                Review: "Fast shipping but the item arrived damaged."
+                Sentiment: mixed
+
+                Now classify this review.
+
+                Review: "{review}"
+                Sentiment:
+                """
+            }
         ],
         n=1
     )
@@ -221,13 +238,26 @@ for i, review in enumerate(reviews):
 ###---------------------------------Prompt Question 4 — Chain of Thought------------------------------------
 
 
-u_content ="""A data engineer earns $85,000 per year. She gets a 12% raise, then 6 months
-later takes a new job that pays $7,500 more per year than her post-raise salary. What is her final annual salary?"""
+u_content ="""
+            A data engineer earns $85,000 per year. She gets a 12% raise, then 6 months
+        later takes a new job that pays $7,500 more per year than her post-raise salary.
+
+        Solve the problem by showing the calculation steps clearly.
+        Format your response like this:
+
+        Solution:
+        1. ...
+        2. ...
+        3. ...
+
+        Final Answer:
+        $...
+"""
 
 response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "show its reasoning step by step before giving a final answer"},
+            {"role": "system", "content": "You are a helpful math tutor. show its reasoning step by step before giving a final answer"},
             {"role": "user", "content": u_content}
         ],
         n=1
@@ -255,9 +285,13 @@ response = client.chat.completions.create(
         n=1
     )
 
+# Step 1: Print the raw model response
+
 raw_response = response.choices[0].message.content
 print("Raw response:")
 print(raw_response)
+
+# Step 2: Parse the JSON response
 try:
     result = json.loads(raw_response)
     print("\nParsed fields:")
@@ -334,13 +368,22 @@ response = client.chat.completions.create(
 print("Response:")
 print(response.choices[0].message.content)
 
+"""""
+ollama output
 
-# ollama response
+A large language model is an artificial intelligence system trained on massive datasets to understand and generate
+human-like text, enabling tasks like writing, answering questions, or creating content. It processes vast amounts
+of information, understands context, and can generate coherent responses, making it highly versatile in various applications.
+"""""
 
-# A large language model is an artificial intelligence system trained on massive datasets to understand and generate
-# human-like text, enabling tasks like writing, answering questions, or creating content. It processes vast amounts
-# of information, understands context, and can generate coherent responses, making it highly versatile in various applications.
+# Comparison:
+# The OpenAI and Ollama responses both explain what a large language model is
+# in two sentences and describe similar capabilities. The wording differs
+# slightly, but the meaning is essentially the same.
 
-# I notice some wording diffrences but overall both explains about large language model in 2 sentences
-# One advantage of running model locally is we dont need to worry about tokens and costs.
-# One disadvantage of running model locally is its not as efficient and accurate as cloud models
+# Advantage of running a model locally with Ollama:
+# - No API costs or token usage, and your data stays on your machine.
+
+# Disadvantage of running a model locally with Ollama:
+# - Requires local computing resources and may be slower or less capable
+#   than larger cloud-hosted models.

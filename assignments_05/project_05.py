@@ -58,10 +58,12 @@ def rewrite_bullets(bullets: list[str]) -> list[dict]:
 
     prompt = f"""
     You are a professional resume coach helping a career changer.
+    
     Rewrite each resume bullet point below to be more specific, results-oriented, and compelling.
     Use strong action verbs. Do not invent facts that aren't implied by the original.
 
     Return ONLY a valid JSON list. Each item should have two keys:
+    
     "original" (the original bullet) and "improved" (your rewritten version).
 
     Bullet points:
@@ -72,8 +74,10 @@ def rewrite_bullets(bullets: list[str]) -> list[dict]:
 
     messages = [{"role": "user", "content": prompt}]
     
-    response = get_completion(messages)
-    response = response.replace("```json", "").replace("```", "").strip()
+    response = get_completion(messages).strip()
+    if response.startswith("```"):
+        lines = response.splitlines()
+        response = "\n".join(lines[1:-1])
     try:        
         results = json.loads(response)
         print("\nResume Bullet Improvements")
@@ -86,6 +90,8 @@ def rewrite_bullets(bullets: list[str]) -> list[dict]:
         return results
     except json.JSONDecodeError:
         print("The model did not return valid JSON.")
+        print("\nRaw response:")
+        print(response)
     return []
     
     
@@ -95,7 +101,7 @@ bullets = [
     "Made reports for the management team",
     "Worked with a team to finish the project on time"
 ]
-
+print("Project Task 2: Bullet Point Rewriter check")
 results = rewrite_bullets(bullets)
 
 # These bullets are weak because they are too general and do not show measurable impact, skills, or outcomes from the canditdate.
@@ -279,14 +285,10 @@ def run_chatbot():
 
         # 7. Otherwise, handle it as a regular chat turn
         else:
-            messages.append(
-        {"role": "user", "content": user_input}
-        )
-        reply = get_completion(messages)
-        print("\nJob Application Helper:\n", reply)
-        messages.append(
-        {"role": "assistant", "content": reply}
-        )
+            messages.append({"role": "user", "content": user_input})
+            reply = get_completion(messages)
+            print("\nJob Application Helper:\n", reply)
+            messages.append({"role": "assistant", "content": reply})
             # YOUR CODE:
             # - Append the user's message to `messages`
             # - Call get_completion(messages)
@@ -300,8 +302,13 @@ if __name__ == "__main__":
     
 #----------------------------------------------Task 6: Ethics Reflection----------------------------------------
 
-# 1) The job application bot may have bias because it learns from text written by different types of people and may prefer 
-# certain communication styles, industries, or cultural backgrounds. It may not always understand every person's unique experience.
+# 1) The job application bot may have bias because it learns from text written by
+# different types of people and may prefer certain writing styles, industries,
+# or backgrounds. It may not fully understand every person's unique experience
+# and could create suggestions that are not fair for everyone.
 
-# 2) The output may include incorrect information, sound too generic, or not match the person's real skills and experience. 
-# A job seeker should review and edit the content before sending it to an employer. without that applicant may get rejected from the job.
+# 2) The output from the AI may include incorrect information, sound too generic,
+# or not fully represent a person's real skills and experience. A job seeker
+# should always review and edit the content before sending it to an employer.
+# If they do not check the information, it could hurt their chances of getting
+# the job because the application may not accurately describe them.
