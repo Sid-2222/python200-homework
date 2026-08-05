@@ -264,50 +264,79 @@ def run_chatbot():
         if not user_input:
             continue
 
-        # 4. Run moderation check before doing anything else
+        # 4. Run moderation check
         if not is_safe(user_input):
-            continue  # is_safe() already printed the warning message
+            continue
 
-        # 5. Check if the user wants to rewrite bullets
-        #    (hint: look for keywords like "bullet" or "resume" in user_input.lower())
+        # 5. Resume bullet rewrite branch
         if "bullet" in user_input.lower() or "resume" in user_input.lower():
+
+            # Save user request to memory
             messages.append({"role": "user", "content": user_input})
+
             print("\nJob Application Helper: Paste your bullet points below, one per line.")
             print("When you're done, type 'DONE' on its own line.\n")
+
             raw_bullets = []
+
             while True:
                 line = input().strip()
+
                 if line.upper() == "DONE":
                     break
+
                 if line:
                     raw_bullets.append(line)
-            # YOUR CODE: call rewrite_bullets() and print the results
+
             result_bullets = rewrite_bullets(raw_bullets)
 
-        # 6. Check if the user wants a cover letter
+            # Save assistant response to memory
+            messages.append(
+                {"role": "assistant", "content": str(result_bullets)}
+            )
+
+        # 6. Cover letter branch
         elif "cover letter" in user_input.lower():
+
+            # Save user request to memory
             messages.append({"role": "user", "content": user_input})
-            job_title = input("Job Application Helper: What is the job title? ").strip()
-            background = input("Job Application Helper: Briefly describe your background: ").strip()
-            # YOUR CODE: call generate_cover_letter() and print the result
-            cover_letter = generate_cover_letter(job_title,background)
-            print("Cover Letter")
-            print(" -" * 50)
+
+            job_title = input(
+                "Job Application Helper: What is the job title? "
+            ).strip()
+
+            background = input(
+                "Job Application Helper: Briefly describe your background: "
+            ).strip()
+
+            cover_letter = generate_cover_letter(job_title, background)
+
+            print("\nCover Letter")
+            print("-" * 50)
             print(cover_letter)
 
-        # 7. Otherwise, handle it as a regular chat turn
-        else:
-            messages.append({"role": "user", "content": user_input})
-            reply = get_completion(messages)
-            print("\nJob Application Helper:\n", reply)
-            messages.append({"role": "assistant", "content": reply})
-            # YOUR CODE:
-            # - Append the user's message to `messages`
-            # - Call get_completion(messages)
-            # - Print the reply
-            # - Append the reply to `messages` as an assistant message
-        
+            # Save assistant response to memory
+            messages.append(
+                {"role": "assistant", "content": cover_letter}
+            )
 
+        # 7. Regular chat branch
+        else:
+            # Save user message
+            messages.append(
+                {"role": "user", "content": user_input}
+            )
+
+            # Generate response using conversation history
+            reply = get_completion(messages)
+
+            print("\nJob Application Helper:")
+            print(reply)
+
+            # Save assistant response
+            messages.append(
+                {"role": "assistant", "content": reply}
+            )
 if __name__ == "__main__":
     run_chatbot()
     
