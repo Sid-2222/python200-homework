@@ -169,7 +169,8 @@ query = "How do I sign up for rewards?"
 simple_keyword_retrieval(query, documents)
 
 """
-Yes, It did as i predicted. As all the documents have 0 sore it doesnt selecy any documents
+Yes, It did as i predicted. As all the documents have 0 sore it doesnt select any documents.
+and the prediction was correct because it just compares words and if nothing matches is score 0.
 
 """
 
@@ -199,13 +200,13 @@ Yes, It did as i predicted. As all the documents have 0 sore it doesnt selecy an
 """
     
     
-| Feature                    | Keyword RAG                       | Semantic RAG            |
-|----------------------------|-----------------------------------|-------------------------|
-| What is compared?          | Exact word overlap                | vector embeddings       |
-| What is retrieved?         | Full document                     | chunk with top score    |
-| Can it handle synonyms?    | No                                | yes                     |
-| Storage format             | Plain text dictionary             | vector database         |
-| Relevance score            | Number of overlapping keywords    | cosine scores           |
+| Feature                    | Keyword RAG                       | Semantic RAG              |
+|----------------------------|-----------------------------------|---------------------------|
+| What is compared?          | Exact word overlap                | vector embeddings         |
+| What is retrieved?         | Full document                     | chunk with the top score  |
+| Can it handle synonyms?    | No                                | yes                       |
+| Storage format             | Plain text dictionary             | vector database           |
+| Relevance score            | Number of overlapping keywords    | cosine scores             |
 
 
 """
@@ -217,7 +218,7 @@ Yes, It did as i predicted. As all the documents have 0 sore it doesnt selecy an
 
 print("\n  LlamaIndex Question 1")
 
-documents = SimpleDirectoryReader("brightleaf_pdfs").load_data()
+documents = SimpleDirectoryReader("resources/brightleaf_pdfs").load_data()
 index = VectorStoreIndex.from_documents(documents)
 query_engine = index.as_query_engine(similarity_top_k=3)
 

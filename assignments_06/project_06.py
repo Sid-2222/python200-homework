@@ -13,13 +13,13 @@ else:
     print("⚠️ Failed to load API key from .env file")
 
 
-docs_dir = Path("groundwork_docs")
+docs_dir = Path("resources/groundwork_docs")
 assert docs_dir.exists(), f"Document directory not found: {docs_dir}"
 
 
 ##------------------------------------Step 2: Load the Documents----------------------------------------------------------------
     
-docs = SimpleDirectoryReader("groundwork_docs").load_data()
+docs = SimpleDirectoryReader("resources/groundwork_docs").load_data()
 
 print(f"\nNumber of documents loaded: {len(docs)}")
 print("\n" + "- " * 80)
