@@ -218,7 +218,7 @@ and the prediction was correct because it just compares words and if nothing mat
 
 print("\n  LlamaIndex Question 1")
 
-documents = SimpleDirectoryReader("resources/brightleaf_pdfs").load_data()
+documents = SimpleDirectoryReader("assignments_06/resources/brightleaf_pdfs").load_data()
 index = VectorStoreIndex.from_documents(documents)
 query_engine = index.as_query_engine(similarity_top_k=3)
 
