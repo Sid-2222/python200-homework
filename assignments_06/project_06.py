@@ -26,6 +26,7 @@ print("\n" + "- " * 80)
 for d in docs:
     print(d.metadata["file_name"])
     
+##-------------------------------------------Step 3: Build the Index and Query Engine------------------------------------------
     
 index = VectorStoreIndex.from_documents(docs)
 query_engine = index.as_query_engine(similarity_top_k=3)
@@ -108,14 +109,18 @@ for i, node in enumerate(response.source_nodes[:3], start=1):
     
     
 """  
- I asked about Groundwork Coffee's revenue in 2020 because I expected this information to be not available in the documents.
+I asked about Groundwork Coffee's revenue in 2020 because I expected this information to not be available in the documents, 
+so I expected the question to be difficult.
 
-The model gave the correct response and did not make up any revenue number.But the retrieved chunks were not related to revenue. 
-They were about the company story, wholesale/catering, and the menu.
+The model gave the correct response and did not make up any revenue number. But the retrieved chunks were not related to revenue. 
+They were about the company story, wholesale/catering, and the menu. So the retrieval failed to find useful information.
 
-The model sounded less confident and clearly said the information could not be determined. This shows we should not blindly trust AI answers.
+The model sounded less confident and clearly said The revenue of Groundwork Coffee Co. in 2020 cannot be determined based on the 
+provided context information. This shows we should not blindly trust AI answers, especially when the retrieved information is not 
+related to the question.
 
-I would make the search better so it can find the right information. I would also add a limit so that unrelated information is not given to the model.
+I would make the search better so it can find the right information. I would also add a limit so that unrelated information
+is not given to the model.
 
 
 """

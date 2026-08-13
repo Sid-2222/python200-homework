@@ -1,15 +1,14 @@
 from dotenv import load_dotenv
 import os
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
-from llama_index.core.evaluation import FaithfulnessEvaluator, RelevancyEvaluator
-from llama_index.llms.openai import OpenAI
 
 if load_dotenv():
     print("API key loaded successfully.")
 else:
     print("Warning: could not load API key. Check your .env file.")
     
-    
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+from llama_index.core.evaluation import FaithfulnessEvaluator, RelevancyEvaluator
+from llama_index.llms.openai import OpenAI
     
 ## =============================== RAG Concepts =====================================================
 
@@ -59,16 +58,32 @@ But if it admits that it isn't sure, it gives people a reason to stop and verify
 """   
 
 
-steps = [
-    "Extract text from source documents",     # get the atcual texts from the source documents or any other source
-    "Split text into chunks",                 # Splitting the texts into smaller chunks so we can get the most relevant chunks rather than whole docs
-    "Convert text chunks into embeddings",    # converting each chunk into a numerical representation of its meaning.
-    "Receive the user's query",               # Get the question or request that the user sends to the system.
-    "Embed the user's query",                 # converting users quary into a numerical representation of its meaning.
-    "Retrieve the most relevant chunks",      # getting the chunks that are most related to the user's question.
-    "Inject retrieved chunks into the prompt", # Adding the relevant chunks to the prompt so the LLM has the information
-    "Generate a response from the LLM"        # The LLM uses the question and retrieved information to create the final answer.
-]
+# RAG Pipeline Steps in Correct Order:
+
+ 1. Extract text from source documents
+    Get the actual texts from the source documents or any other source.
+
+ 2. Split text into chunks
+    Splitting the texts into smaller chunks so we can get the most relevant
+    chunks rather than the whole documents.
+
+ 3. Convert text chunks into embeddings
+    Converting each chunk into a numerical representation of its meaning.
+
+ 4. Receive the user's query
+    Get the question or request that the user sends to the system.
+
+ 5. Embed the user's query
+    Converting the user's query into a numerical representation of its meaning.
+
+ 6. Retrieve the most relevant chunks
+    Getting the chunks that are most related to the user's question.
+
+ 7. Inject retrieved chunks into the prompt
+    Adding the relevant chunks to the prompt so the LLM has the information.
+
+ 8. Generate a response from the LLM
+    The LLM uses the question and retrieved information to create the final answer.
 
 
 """
@@ -161,7 +176,7 @@ Semantic RAG would do better because it can match related meaning rather than re
 ##---------------------------------------Keyword Question 3---------------------------------------------------------
 
 """
-I predict that as there are no words matching the output would be No overlapping keywords found
+I predict that as there are no words matching in the quary and the documents the output would be No overlapping keywords found
     
 """
 
@@ -200,14 +215,13 @@ and the prediction was correct because it just compares words and if nothing mat
 """
     
     
-| Feature                    | Keyword RAG                       | Semantic RAG              |
-|----------------------------|-----------------------------------|---------------------------|
-| What is compared?          | Exact word overlap                | vector embeddings         |
-| What is retrieved?         | Full document                     | chunk with the top score  |
-| Can it handle synonyms?    | No                                | yes                       |
-| Storage format             | Plain text dictionary             | vector database           |
-| Relevance score            | Number of overlapping keywords    | cosine scores             |
-
+# | Feature                 | Keyword RAG                    | Semantic RAG                              |
+# | ----------------------- | ------------------------------ | ----------------------------------------- |
+# | What is compared?       | Exact word overlap             | Vector embeddings                         |
+# | What is retrieved?      | Full document                  | Most relevant chunks                      |
+# | Can it handle synonyms? | No                             | Yes                                       |
+# | Storage format          | Plain text dictionary          | Embeddings/chunks in a vector index       |
+# | Relevance score         | Number of overlapping keywords | Cosine similarity score                   |
 
 """
 
@@ -245,15 +259,23 @@ for q in questions:
         
 """   
 
-1.  After observing the output of question 1, we can say that the chunks are mostly related, but not fully. Chunk 1 is highly related 
-    because it talks about employee well-being, but chunk 3 mostly talks about Network and Data Security, not employee benefits.
+Question 1:
 
-    After observing the output of question 2, the outputs are the same as question 1. Chunk 1 is highly relevant, and chunk 3 is 
-    less relevant than chunk 1.
+After observing the output of Question 1, we can say that the chunks are mostly related, but not fully. Chunk 1 is highly related 
+because it talks about employee benefits, but Chunk 2 and Chunk 3 are less related to the question. Chunk 3 mostly talks about Network 
+and Data Security, not employee benefits.
 
-2.  The model's response sounds confident enough and specific, like mentioning 401(k), and there are no phrases like "I'm not sure."
+The model's response sounds confident enough and specific, like mentioning 401(k), and there are no phrases 
+like "I'm not sure." The unexpected thing was that the last chunk it retrieved was not very relevant to the question.
 
-3.  The unexpected thing was that the last chunk it retrieved was not very relevant to the question.     
+
+Question 2:
+
+After observing the output of Question 2, we can say that the chunks are mostly related, but not fully. 
+Chunk 1 is highly relevant because it talks about Network and Data Security, but Chunk 2 and Chunk 3 are less relevant to the question.
+
+The model's response sounds confident enough and specific, and there are no phrases like "I'm not sure." 
+The unexpected thing was that the second and third chunks it retrieved were not very relevant to the question.
 
 
 
@@ -298,44 +320,45 @@ for i, source_node in enumerate(response.source_nodes, start=1):
 
         
 """  
-
 With k = 1 and k = 5, the responses are pretty much the same. They have some different words, but mostly they are similar.
-This indicates that more retrieved context is not always better because the lower-ranked chunks are less relevant or not related to the question.
+With k = 5, the model included some extra information about diversity, equity, and inclusion, while the k = 1 response was a little more focused.
+
+This indicates that more retrieved context is not always better because the lower-ranked chunks are less relevant or not related to the 
+question. In this case, k = 1 was enough to give a good answer, so adding more chunks did not make the response much better.
 
 
 """
         
 ##-----------------------------------------LlamaIndex Question 3----------------------------------------------------        
 print("\n  LlamaIndex Question 3")
-questions = [
-    "What does BrightLeaf doing in adaptaing AI in the company?",
-    "What are BrightLeaf's warrenty policies for their product?",
-]
+q = "What are BrightLeaf's warrenty policies for their product?"
+
 query_engine = index.as_query_engine(similarity_top_k=3)
 
-for q in questions:
-    print("\n" + "- " * 80)
-    print(f"Question: {q}")
-    print("\n" + "- " * 80)
-    response = query_engine.query(q)
-    print(f"\nAnswer:\n{response}\n")
-    print("\n" + "- " * 80)
-    print("\nRetrieved source chunks:")
+print("\n" + "- " * 80)
+print(f"Question: {q}")
+print("\n" + "- " * 80)
+response = query_engine.query(q)
+print(f"\nAnswer:\n{response}\n")
+print("\n" + "- " * 80)
+print("\nRetrieved source chunks:")
     
-    for i, source_node in enumerate(response.source_nodes, start=1):
-        print(f"\nSource {i}")
-        print(f"Similarity score: {source_node.score:.4f}")
-        print(f"Chunk: {source_node.node.get_content()[:150]}")    
+for i, source_node in enumerate(response.source_nodes, start=1):
+    print(f"\nSource {i}")
+    print(f"Similarity score: {source_node.score:.4f}")
+    print(f"Chunk: {source_node.node.get_content()[:150]}")    
         
 """ 
 
-For Question 1, the model confidently responded about scholarships, internships, and certificate programs, etc.
-But after looking at the chunks it retrieved, it seems that they do not clearly support the answer, which I did not expect. 
-I expected the chunks to be more relevant.
+I expected the query to be difficult because the warranty information may not be in the documents. The system did not hallucinate 
+and correctly said the warranty policy was not mentioned in the provided context.
 
-For Question 2, the model did not hallucinate. It said that it did not have specific information regarding the warranty policies, 
-which is what I expected. However, the chunks it retrieved were not related to the question.
-    
+
+The retrieved chunks were unrelated, covering employee benefits, the company overview, and network security.
+
+I would make the system better at knowing when it does not have the answer. Maybe I could use a similarity score limit so
+it does not use unrelated chunks when answering the question.
+
 
 """       
         
@@ -394,7 +417,7 @@ print("\n" + "- " * 80)
     information in the response can be supported by the retrieved content.
     
 3.  Yes, the score changes between the two queries. This happens because query 2 is about something for which there is no information. 
-    Therefore, the model's response does not mention anything about owning a cricket team.
+    Therefore, the model's response does not mention anything about owning a cricket team.,so both scores were 0.0.
     
     
 4.  LLM-as-a-judge is when we use a diffrent LLM to score another model's answer. It is useful instead of exact-match accuracy because the same 
