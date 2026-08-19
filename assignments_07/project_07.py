@@ -29,21 +29,24 @@ DATA_PATH = "assignments_01/outputs/merged_happiness.csv"
 
 df = None
 
-
-""" 
-Tool 1: load_happiness_data
-"""
-
 @tool
 def load_happiness_data() -> dict:
     """Load the World Happiness dataset into memory.
 
-    First, try to load the merged CSV from DATA_PATH. If it does not
-    exist, load and merge all yearly CSV files from the
-    assignments/resources/happiness_project/ directory.
+    The function first attempts to load the merged happiness dataset from
+    DATA_PATH. If the merged file does not exist, it loads all yearly CSV
+    files from the happiness project resources directory, adds a ``Year``
+    column based on each filename, and combines them into one DataFrame.
 
     Returns:
-        dict: The DataFrame shape and column names.
+        dict: A dictionary containing the shape of the loaded DataFrame and
+            a list of its column names.
+
+    Raises:
+        FileNotFoundError: If the fallback data directory does not exist or
+            contains no CSV files.
+        ValueError: If a yearly CSV filename does not contain a four-digit
+            year.
     """
     global df
 
@@ -52,6 +55,11 @@ def load_happiness_data() -> dict:
     else:
         data_dir = "assignments/resources/happiness_project/"
         yearly_files = []
+
+        if not os.path.exists(data_dir):
+            raise FileNotFoundError(
+                f"Data directory not found: {data_dir}"
+            )
 
         for filename in os.listdir(data_dir):
             if filename.endswith(".csv"):
@@ -63,6 +71,18 @@ def load_happiness_data() -> dict:
 
         for filepath in yearly_files:
             yearly_df = pd.read_csv(filepath)
+
+            # Extract the four-digit year from the filename.
+            year_matches = re.findall(r"\b(19|20)\d{2}\b", os.path.basename(filepath))
+
+            if not year_matches:
+                raise ValueError(
+                    f"Could not determine year from filename: {filepath}"
+                )
+
+            year = re.search(r"\b(?:19|20)\d{2}\b", os.path.basename(filepath)).group()
+
+            yearly_df["Year"] = int(year)
             dataframes.append(yearly_df)
 
         if not dataframes:
@@ -76,7 +96,6 @@ def load_happiness_data() -> dict:
         "shape": df.shape,
         "columns": df.columns.tolist()
     }
-    
     
 """
 Tool 2: summarize_column
@@ -251,35 +270,46 @@ model = OpenAIServerModel(api_key=api_key, model_id="gpt-4o-mini")
 
 SYSTEM_PROMPT = """
 You are a data analyst assistant for the World Happiness dataset.
-Use the available tools for loading data, summarizing columns, computing correlations,
-and ranking countries. Write Python code directly only when the tools are not sufficient
-(for example, when creating custom plots or computing something the tools don't cover).
 
-Important: load_happiness_data() loads the dataset into the global pandas DataFrame `df`,
+Use the available tools for loading data, summarizing columns, computing
+correlations, and ranking countries. Write Python code directly only when
+the tools are not sufficient, such as when creating custom plots.
+
 Important:
-- load_happiness_data() loads the dataset and returns only a dictionary containing
-  the dataset shape and column names.
+- load_happiness_data() loads the dataset and returns a dictionary containing
+  only the dataset shape and column names.
 - Do not treat the return value of load_happiness_data() as a pandas DataFrame.
-- The global DataFrame `df` inside the tool functions is not directly available
+- The global DataFrame inside the tool functions is not directly available
   to CodeAgent-generated Python code.
-- When custom analysis or plotting requires the full dataset, read the CSV directly
-  using pandas from:
+- When custom analysis or plotting requires the full dataset, read the CSV
+  directly using pandas from:
   assignments_01/outputs/merged_happiness.csv
-- The actual dataset column names are:
-  "Ranking", "Country", "Year", "Regional indicator",
-  "Happiness score", "GDP per capita", "Social support",
-  "Healthy life expectancy", "Freedom to make life choices",
-  "Generosity", "Perceptions of corruption".
-- Use the exact column names from the dataset.
-- For example, use "Happiness score", not "happiness_score".
-- Use "GDP per capita", not "gdp_per_capita".
-- Use "Regional indicator", not "region".
-- For custom plots, use pandas and matplotlib.
-- Save plots to the exact file path requested by the user.
-- column happiness_score means column Happiness score
-- column gdp_per_capita means column  GDP per capita
-- Be concise and student-friendly in your responses.
 
+The exact dataset column names are:
+"Ranking"
+"Country"
+"Year"
+"Regional indicator"
+"Happiness score"
+"GDP per capita"
+"Social support"
+"Healthy life expectancy"
+"Freedom to make life choices"
+"Generosity"
+"Perceptions of corruption"
+
+Always use these exact column names. Do not substitute snake_case names such
+as happiness_score or gdp_per_capita.
+
+For custom plots:
+- Use pandas and matplotlib.
+- Use "Regional indicator" for region information.
+- Use "Year" for the x-axis.
+- Use "Happiness score" for happiness values.
+- Save plots to the exact path requested by the user.
+- Create the output directory if necessary.
+
+Be concise and student-friendly in your responses.
 """
 
 agent = CodeAgent(
@@ -306,10 +336,10 @@ if __name__ == "__main__":
     
     queries = [
         "Load the happiness data and tell me its shape and column names.",
-        "Summarize the happiness_score column.",
-        "What is the correlation between gdp_per_capita and happiness_score? Is it statistically significant?",
+        "Summarize the Happiness score column.",
+        "What is the correlation between GDP per capita and Happiness score? Is it statistically significant?",
         "Show me the top 5 happiest countries in 2020.",
-        "Plot Happiness score over the years as a line chart, with one line per region. Save the plot to assignments_07/outputs/happiness_by_region.png.",
+        "Plot Happiness score over the years as a line chart, with one line per Regional indicator. Save the plot to outputs/happiness_by_region.png.",
         ]
 
     for query in queries:
@@ -319,45 +349,37 @@ if __name__ == "__main__":
     
     
 ##--------------------------------------------Task 4: Your Own Questions---------------------------------------------------------
-
-
-
+        
     # My query 1
-    my_query_1 = [
-        "Load the happiness data",
-        "what is the correlation between Healthy life expectancy and GDP per capita"
-                ]   # replace with your question
+    my_query_1 = "What is the correlation between Healthy life expectancy and GDP per capita?"
 
-    for query in my_query_1:
-        print(f"\n--- Query: {query} ---")
-        response = agent.run(query, reset=False)
-        print(response)
-
+    response_1 = agent.run(my_query_1, reset=False)
+    print(f"\n--- Query: {my_query_1} ---")
+    print(response_1)
     """ 
-    Comment: My quary did trigger a tool correlation_result = compute_correlation("Healthy life expectancy", "GDP per capita")
-    But it did not generate any code
-    
+        Comment: This query triggered the compute_correlation tool:
+        compute_correlation("Healthy life expectancy", "GDP per capita")
+        It did not require the agent to generate custom Python code.
+
+
     """
-                                                                                                                                                
+
 
     # My query 2
-    my_query_2 = [
-        "Load the happiness data",
-        "plot a line chart for country India use columns Happiness score,GDP per capita,Social support,Healthy life expectancy,Freedom to make life choices,Generosity,Perceptions of corruption for all the years available and Save the plot to assignments_07/outputs/india_line_chart.png.",
-        "plot a line chart for country United States use columns Happiness score,GDP per capita,Social support,Healthy life expectancy,Freedom to make life choices,Generosity,Perceptions of corruption for all the years available and Save the plot to assignments_07/outputs/usa_line_chart.png.",
-        ]   # replace with your question
+    my_query_2 = "Plot a line chart for the United States using the columns Happiness score, GDP per capita, Social support, Healthy life expectancy, Freedom to make life choices, Generosity, and Perceptions of corruption for all available years. Save the plot to outputs/usa_line_chart.png."
 
-
-    for query in my_query_2:
-        print(f"\n--- Query: {query} ---")
-        response = agent.run(query, reset=False)
-        print(response)
+    response_2 = agent.run(my_query_2, reset=False)
+    print(f"\n--- Query: {my_query_2} ---")
+    print(response_2)
 
     """ 
-
-    Comment: MY quary here did not call any tool it generates code for the line plots.
-
+        Comment: This query did not require any of the available tools.
+        The agent generated Python code using pandas and matplotlib to create
+        the requested line chart and save it to the specified output path.
     """
+
+
+
 
 
     ##------------------------------------------Task 5: Reflection---------------------------------------------------------------------------

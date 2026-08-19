@@ -49,22 +49,19 @@ def celsius_to_fahrenheit(celsius: float) -> str:
     return f"{celsius}°C is {fahrenheit}°F"
 
 celsius_to_fahrenheit_schema = {
-        "type": "function",
-        "function":{
-             "name": "celsius_to_fahrenheit",
-             "description":"Convert a Celsius temperature to Fahrenheit and return it as a formatted string",
-             "parameters" : {
-                 "type": "object",
-                 "properties":{
-                     "celsius": {
-                         "type" : "number",
-                         "description": "The temperature in degrees Celsius."
-                     }
-                 },
-                 "required": ["celsius"],
-             }
-        }
+    "name": "celsius_to_fahrenheit",
+    "description": "Convert a Celsius temperature to Fahrenheit and return it as a formatted string.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "celsius": {
+                "type": "number",
+                "description": "The temperature in degrees Celsius."
+            }
+        },
+        "required": ["celsius"]
     }
+}
 
 
 print(celsius_to_fahrenheit(0))
@@ -103,6 +100,140 @@ tools = [
             },
         },
     },
+]
+
+def get_current_time() -> str:
+    '''Return the current local time as a formatted string.'''
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
+def run_agent(user_prompt: str) -> str:
+    '''Run a minimal ReAct-style agent for a single user prompt.'''
+
+    SYSTEM_PROMPT = '''You are a simple assistant that can tell the current time.
+                     Use the tool get_current_time whenever a user asks about the time.'''
+    
+    # Step 1: start the conversation with system and user messages
+    messages = [
+        {'role': 'system', 'content': SYSTEM_PROMPT},
+        {'role': 'user', 'content': user_prompt},
+    ]
+
+    # Step 2: first API call - the model decides whether to call a tool
+    first_response = client.chat.completions.create(
+        model='gpt-4.1-mini',
+        messages=messages,
+        tools=tools,
+        tool_choice='auto',  # model chooses whether to use a tool
+    )
+
+    print("First response received from model...")
+    print(first_response)
+    first_message = first_response.choices[0].message
+
+    # Record what the model said so far
+    messages.append(
+        {
+            'role': 'assistant',
+            'content': first_message.content,
+            'tool_calls': first_message.tool_calls,
+        }
+    )
+
+    # Step 3: check if the model requested any tools
+    if first_message.tool_calls:
+        print("Agentic mode engaged...")
+        for tool_call in first_message.tool_calls:
+            function_name = tool_call.function.name
+            # In this example we only have one tool: get_current_time
+            if function_name == 'get_current_time':
+                tool_result = get_current_time()                
+            
+            else:
+                tool_result = f'Error: unknown tool {function_name}.'
+
+            # Print for debugging so we can see what happened
+            print('Tool called:', function_name)
+            print('Tool result:', tool_result)
+
+            # Step 3b: append the tool output so the model can see it
+            messages.append(
+                {
+                    'role': 'tool',
+                    'tool_call_id': tool_call.id,
+                    'name': function_name,
+                    'content': tool_result,
+                }
+            )
+
+        # Step 4: second API call - model sees the tool result and gives final answer
+        second_response = client.chat.completions.create(
+            model='gpt-4.1-mini',
+            messages=messages,
+        )
+        print("Second response received from model...")
+        print(second_response)
+
+        final_message = second_response.choices[0].message
+        return final_message.content or ''
+    else:
+        print("No tools needed....")
+
+    # If there were no tool calls, the first response was already the final answer
+    return first_message.content or ''
+
+print("Question 2")
+
+"""
+1. I assume calling run_agent("Convert 100 degrees Celsius to Fahrenheit") won't trigger any tool because the llm already
+   knows the formula to convert 100 degree Celsius. But the question 2 says to copy the run_agent function from the lesson
+   not the tools of that lesson and the function get_current_time. so i cpoied that too. 
+   
+   and also it uses the tools from question 1 not from the lesson's tools of the run_agent function source.
+   
+2. I assume 1 API call will be enough to answer the quary without calling any tools.  
+
+"""
+answer = run_agent("Convert 100 degrees Celsius to Fahrenheit")
+print(answer)
+
+""" 
+
+My prediction was that the model would answer the Celsius conversion directly
+without using a tool. The important result is that celsius_to_fahrenheit is not
+available in the Q2 tools list, so the agent cannot successfully execute that
+tool in Q2.
+
+The second API call only happens if the first response contains a tool call.
+
+"""
+
+
+
+
+
+
+
+
+
+
+###---------------------------------------------------Q3-----------------------------------------------------------------
+ 
+print("\n Question 3")
+
+tools = [
+    {
+        'type': 'function',
+        'function': {
+            'name': 'get_current_time',
+            'description': 'Returns the current local time as a string.',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+            },
+        },
+    },
     {
         "type": "function",
         "function":{
@@ -122,9 +253,6 @@ tools = [
     },
 ]
 
-def get_current_time() -> str:
-    '''Return the current local time as a formatted string.'''
-    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
 def run_agent(user_prompt: str) -> str:
@@ -205,54 +333,25 @@ def run_agent(user_prompt: str) -> str:
     # If there were no tool calls, the first response was already the final answer
     return first_message.content or ''
 
-print("Question 2")
 
-"""
-1. I assume calling run_agent("Convert 100 degrees Celsius to Fahrenheit") won't trigger any tool because the llm already
-   knows the formula to convert 100 degree Celsius. But the question 2 says to copy the run_agent function from the lesson
-   not the tools of that lesson and the function get_current_time. so i cpoied that too. 
-   
-   and also it uses the tools from question 1 not from the lesson's tools of the run_agent function source.
-   
-2. I assume 1 API call will be enough to answer the quary without calling any tools.  
-
-"""
-answer = run_agent("Convert 100 degrees Celsius to Fahrenheit")
-print(answer)
-
-""" 
-My prediction was wrong. It does call for a tool which resulted in Error: unknown tool because the question didn't mention
-to add the tool celsius_to_fahrenheit in the question yet.
-
-Also it called the API 2 times.
-
-"""
-
-
-
-
-
-
-
-
-###---------------------------------------------------Q3-----------------------------------------------------------------
- 
-print("\n Question 3")
 response_a = run_agent("What is 37 degrees Celsius in Fahrenheit?")
 print("Response A:", response_a)
 
 """
-For response A the tool which got called is celsius_to_fahrenheit because the pronpt was What is 37
-degrees Celsius in Fahrenheitwhich match the tools.
-
+Response A:
+The agent calls the celsius_to_fahrenheit tool because the user is asking
+for a Celsius-to-Fahrenheit conversion. The tool receives 37 as the
+celsius argument and returns 37°C is 98.6°F.
 """
 
 response_b = run_agent("What is the boiling point of water in plain English?")
 print("Response B:", response_b)
 
-""" 
-For response B there was no tool needed and the llm was able to answer from its reasoning.
-
+"""
+Response B:
+The agent does not need to call a tool because the question can be
+answered directly from the model's existing knowledge. Therefore,
+no tool call is made and the model answers the question directly.
 """
 
 
@@ -727,7 +826,13 @@ result is statistically significant.
 
 ##---------------------------------------------------Question 6-----------------------------------------------------
 print("\n Question 6")
-##system = instructions, user = question, assistant = agent, tool = tool output
+
+# ReAct message roles:
+# system = the system instructions that define the agent's behavior and available task rules
+# user = the user's request or question
+# assistant = the LLM's response, including reasoning/tool-call requests
+# tool = the result returned by a Python tool after the assistant requests it
+
 import json
 print(json.dumps(messages, indent=2, default=str))
 
@@ -759,10 +864,14 @@ print("\n Question 7")
 print(compute_correlation.description)
 
 """
-smolagents automatically generates the tool description from the function name, type hints, and docstring and JSON schema
-We don't need to write it manually. In Q4 we had to  manually write the JSON schema. Smolagents needs the developer to provide
-a clear function name, parameter type hints, and descriptions for each parameter so it understand what the tool does and how to use it.
+smolagents needs the developer to provide a clear function name, a useful
+docstring describing what the tool does, type hints for the parameters and
+return value, and clear descriptions of each parameter. smolagents uses this
+information to automatically generate the tool description and schema that
+the LLM uses to understand when and how to call the tool.
 
+Unlike Q4, where we manually created the JSON schema, smolagents generates
+the schema from the function's name, type hints, and docstring.
 """
 
 
@@ -818,7 +927,7 @@ def plot_data(y: str, x: str, plot_type: str = "line") -> str:
         f"{plot_type.title()} plot: {y} vs {x}"
     )
 
-    output_path = "assignments_07/outputs/q8_plot.png"
+    output_path = "outputs/q8_plot.png"
 
     plt.savefig(output_path)
     plt.close()
@@ -870,52 +979,44 @@ print(response_code)
 
 
 
-"""  
+"""
+Both agents received the same prompt, the same TOOLS list, and the same model.
 
-   Both agents were able to create the scatter plot of avg_heart_rate vs duration_min.
-   The ToolCallingAgent called the load_csv and plot_data tools and the tool created
-   the scatter plot with green dots.
+The ToolCallingAgent called load_csv and then plot_data. The plot_data tool
+itself specifies color="green", so the ToolCallingAgent did not independently
+choose or change the dot color. It simply passed the request to the tool, and
+the tool produced a scatter plot with green dots.
 
-   The CodeAgent also created the same scatter plot. It wrote Python code to call
-   load_csv and plot_data.
+The CodeAgent also produced a scatter plot with green dots. It generated
+Python code and used the available tools to complete the task. It also did
+not independently change the dot color because the plot_data tool controls
+the color.
 
-   I first thought that the ToolCallingAgent might change the dot color because the
-   prompt specifically asked for green dots. But looking at the result, the color is
-   actually controlled by the plot_data function, not by the agent itself. So both
-   agents were basically using the functionality that we gave them.
-   
-   
-   
-   I think the ToolCallingAgent is more useful when we already have specific tools
-   that can do the task. It can decide which tool to call, but it is limited to the
-   tools that we provide.
-
-   The CodeAgent seems more useful when the task needs more flexible Python code.
-   It can write and execute code, so it has more freedom to perform calculations,
-   manipulate data, or combine different operations.
-
-
+Therefore, both agents produced the same type of plot with green dots.
+The important difference is how they completed the task: ToolCallingAgent
+uses predefined tools directly, while CodeAgent can generate and execute
+Python code and can use tools as part of that process.
 """
 
 
 ###---------------------------------------------------Q9-----------------------------------------------------
 
 """
-1. I think a ToolCallingAgent would be better for a task like checking the weather
-   or getting the current time. The reason is that we can create a specific tool
-   that does exactly what we need, and the agent just decides when to use that tool.
+1. A ToolCallingAgent would be better for a task like checking the weather
+or getting the current time. We can provide a specific tool that performs
+the task, and the agent only needs to decide when to call that tool. This
+makes the behavior more controlled and predictable.
 
-   This is a good fit because the task has a clear and limited set of actions.
-   We don't need the agent to write and execute its own Python code. Using a
-   predefined tool also makes the behavior more controlled and predictable.
+2. The main risk with a CodeAgent is that it generates and executes code.
+Because the generated code actually runs, incorrect or unexpected code
+could perform unwanted actions if the agent has access to files, data,
+the operating system, or other resources. For example, generated code
+could modify files or data or perform operations that the developer did
+not intend.
 
+The ToolCallingAgent is more restricted because it can only call the
+predefined tools that we give it. CodeAgent provides more flexibility,
+but that ability to generate and execute code also creates additional
+security and safety risks.
 
-2. One risk with a CodeAgent is that the agent actually generates and runs code.
-   If the generated code is wrong or does something we did not expect, it could
-   potentially modify files, delete data, or perform other unwanted actions,
-   depending on what access the agent has.
-
-   A ToolCallingAgent is more limited because it can only call the tools that we
-   give it. So I think the main difference is that CodeAgent has more flexibility,
-   but that flexibility also creates more risk.
 """
