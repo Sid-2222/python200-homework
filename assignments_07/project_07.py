@@ -38,26 +38,45 @@ Tool 1: load_happiness_data
 def load_happiness_data() -> dict:
     """Load the World Happiness dataset into memory.
 
-    Loads the merged World Happiness dataset from DATA_PATH and stores
-    it in the global DataFrame.
+    First, try to load the merged CSV from DATA_PATH. If it does not
+    exist, load and merge all yearly CSV files from the
+    assignments/resources/happiness_project/ directory.
 
     Returns:
-        dict: A dictionary containing the dataset shape and column names.
-        If the file does not exist, returns an error message instead.
+        dict: The DataFrame shape and column names.
     """
     global df
 
-    if not os.path.exists(DATA_PATH):
-        return {
-            "error": f"Data file does not exist: {DATA_PATH}"
-        }
+    if os.path.exists(DATA_PATH):
+        df = pd.read_csv(DATA_PATH)
+    else:
+        data_dir = "assignments/resources/happiness_project/"
+        yearly_files = []
 
-    df = pd.read_csv(DATA_PATH)
+        for filename in os.listdir(data_dir):
+            if filename.endswith(".csv"):
+                yearly_files.append(os.path.join(data_dir, filename))
+
+        yearly_files.sort()
+
+        dataframes = []
+
+        for filepath in yearly_files:
+            yearly_df = pd.read_csv(filepath)
+            dataframes.append(yearly_df)
+
+        if not dataframes:
+            raise FileNotFoundError(
+                f"No yearly CSV files found in {data_dir}"
+            )
+
+        df = pd.concat(dataframes, ignore_index=True)
 
     return {
         "shape": df.shape,
-        "columns": df.columns.tolist(),
+        "columns": df.columns.tolist()
     }
+    
     
 """
 Tool 2: summarize_column
@@ -257,6 +276,8 @@ Important:
 - Use "Regional indicator", not "region".
 - For custom plots, use pandas and matplotlib.
 - Save plots to the exact file path requested by the user.
+- column happiness_score means column Happiness score
+- column gdp_per_capita means column  GDP per capita
 - Be concise and student-friendly in your responses.
 
 """
@@ -275,13 +296,21 @@ agent = CodeAgent(
 
 if __name__ == "__main__":
     
+    # queries = [
+    #     "Load the happiness data and tell me its shape and column names.",
+    #     "Summarize the Happiness score column.",
+    #     "What is the correlation between GDP per capita and Happiness score? Is it statistically significant?",
+    #     "Show me the top 5 happiest countries in 2020.",
+    #     "Plot Happiness score over the years as a line chart, with one line per region. Save the plot to assignments_07/outputs/happiness_by_region.png.",
+    # ]
+    
     queries = [
         "Load the happiness data and tell me its shape and column names.",
-        "Summarize the Happiness score column.",
-        "What is the correlation between GDP per capita and Happiness score? Is it statistically significant?",
+        "Summarize the happiness_score column.",
+        "What is the correlation between gdp_per_capita and happiness_score? Is it statistically significant?",
         "Show me the top 5 happiest countries in 2020.",
         "Plot Happiness score over the years as a line chart, with one line per region. Save the plot to assignments_07/outputs/happiness_by_region.png.",
-    ]
+        ]
 
     for query in queries:
         print(f"\n--- Query: {query} ---")

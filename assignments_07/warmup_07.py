@@ -48,8 +48,7 @@ def celsius_to_fahrenheit(celsius: float) -> str:
     fahrenheit = (celsius * 9 / 5) + 32
     return f"{celsius}°C is {fahrenheit}°F"
 
-tools = [
-    {
+celsius_to_fahrenheit_schema = {
         "type": "function",
         "function":{
              "name": "celsius_to_fahrenheit",
@@ -66,7 +65,7 @@ tools = [
              }
         }
     }
-]
+
 
 print(celsius_to_fahrenheit(0))
 print(celsius_to_fahrenheit(100))
@@ -91,6 +90,37 @@ print(celsius_to_fahrenheit(-40))
 
 ##------------------------------------------------------Q2---------------------------------------------------------
 
+tools = [
+    {
+        'type': 'function',
+        'function': {
+            'name': 'get_current_time',
+            'description': 'Returns the current local time as a string.',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function":{
+             "name": "celsius_to_fahrenheit",
+             "description":"Convert a Celsius temperature to Fahrenheit and return it as a formatted string",
+             "parameters" : {
+                 "type": "object",
+                 "properties":{
+                     "celsius": {
+                         "type" : "number",
+                         "description": "The temperature in degrees Celsius."
+                     }
+                 },
+                 "required": ["celsius"],
+             }
+        }
+    },
+]
 
 def get_current_time() -> str:
     '''Return the current local time as a formatted string.'''
@@ -205,9 +235,6 @@ Also it called the API 2 times.
 
 
 
-
-
-
 ###---------------------------------------------------Q3-----------------------------------------------------------------
  
 print("\n Question 3")
@@ -215,7 +242,8 @@ response_a = run_agent("What is 37 degrees Celsius in Fahrenheit?")
 print("Response A:", response_a)
 
 """
-For response A the tool which got called is celsius_to_fahrenheit because the pronpt was What is 37 degrees Celsius in Fahrenheitwhich match the tools.
+For response A the tool which got called is celsius_to_fahrenheit because the pronpt was What is 37
+degrees Celsius in Fahrenheitwhich match the tools.
 
 """
 
@@ -414,7 +442,7 @@ class CsvManager:
         plt.show()
         
         return f"Plotted {y} vs {x} as a {plot_type}."
-    
+    ##----------------------------Q4-----------------------------------
     def compute_correlation(self, col1: str, col2: str):
         """
         Compute the Pearson correlation between two columns in the loaded DataFrame.
@@ -665,6 +693,7 @@ SYSTEM_PROMPT = (
     "Keep answers short and student-friendly."
 )
 
+##------------------------------------------------Q5---------------------------------------------------
 
 print("\n Question 5")
 messages = [{"role": "system", "content": SYSTEM_PROMPT}]
