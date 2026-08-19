@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime
 import json
+import re
 from scipy.stats import pearsonr
 # smolagents imports
 from smolagents import ToolCallingAgent, OpenAIServerModel, tool
@@ -33,69 +34,78 @@ df = None
 def load_happiness_data() -> dict:
     """Load the World Happiness dataset into memory.
 
-    The function first attempts to load the merged happiness dataset from
-    DATA_PATH. If the merged file does not exist, it loads all yearly CSV
-    files from the happiness project resources directory, adds a ``Year``
-    column based on each filename, and combines them into one DataFrame.
+    The function first attempts to load the merged CSV from DATA_PATH.
+    If that file does not exist, it loads all yearly CSV files from
+    assignments/resources/happiness_project/, adds a Year column based
+    on each filename, and combines the files into one DataFrame.
 
     Returns:
-        dict: A dictionary containing the shape of the loaded DataFrame and
-            a list of its column names.
+        dict: A dictionary containing the shape of the loaded DataFrame
+            and a list of its column names.
 
     Raises:
-        FileNotFoundError: If the fallback data directory does not exist or
-            contains no CSV files.
+        FileNotFoundError: If the fallback data directory does not exist
+            or contains no CSV files.
         ValueError: If a yearly CSV filename does not contain a four-digit
             year.
     """
     global df
 
+    # First, try to load the merged dataset.
     if os.path.exists(DATA_PATH):
         df = pd.read_csv(DATA_PATH)
+
+    # If the merged file does not exist, use the yearly CSV files.
     else:
         data_dir = "assignments/resources/happiness_project/"
-        yearly_files = []
 
         if not os.path.exists(data_dir):
             raise FileNotFoundError(
                 f"Data directory not found: {data_dir}"
             )
 
+        yearly_files = []
+
         for filename in os.listdir(data_dir):
             if filename.endswith(".csv"):
-                yearly_files.append(os.path.join(data_dir, filename))
+                yearly_files.append(
+                    os.path.join(data_dir, filename)
+                )
 
         yearly_files.sort()
+
+        if not yearly_files:
+            raise FileNotFoundError(
+                f"No yearly CSV files found in {data_dir}"
+            )
 
         dataframes = []
 
         for filepath in yearly_files:
             yearly_df = pd.read_csv(filepath)
 
-            # Extract the four-digit year from the filename.
-            year_matches = re.findall(r"\b(19|20)\d{2}\b", os.path.basename(filepath))
+            # Get the four-digit year from the filename.
+            year_match = re.search(
+                r"\b(?:19|20)\d{2}\b",
+                os.path.basename(filepath)
+            )
 
-            if not year_matches:
+            if not year_match:
                 raise ValueError(
                     f"Could not determine year from filename: {filepath}"
                 )
 
-            year = re.search(r"\b(?:19|20)\d{2}\b", os.path.basename(filepath)).group()
-
-            yearly_df["Year"] = int(year)
+            yearly_df["Year"] = int(year_match.group())
             dataframes.append(yearly_df)
 
-        if not dataframes:
-            raise FileNotFoundError(
-                f"No yearly CSV files found in {data_dir}"
-            )
-
+        # Combine all yearly datasets.
         df = pd.concat(dataframes, ignore_index=True)
 
     return {
         "shape": df.shape,
         "columns": df.columns.tolist()
     }
+
     
 """
 Tool 2: summarize_column

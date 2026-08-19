@@ -186,8 +186,7 @@ print("Question 2")
 
 
 # 1. I assume calling run_agent("Convert 100 degrees Celsius to Fahrenheit") won't trigger any tool because the llm already
-#    knows the formula to convert 100 degree Celsius.  
-   
+#    knows the formula to convert 100 degree Celsius.    
    
 # 2. I assume 1 API call will be enough to answer the quary without calling any tools.  
 
