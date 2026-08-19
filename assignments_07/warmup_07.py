@@ -184,29 +184,27 @@ def run_agent(user_prompt: str) -> str:
 
 print("Question 2")
 
-"""
-1. I assume calling run_agent("Convert 100 degrees Celsius to Fahrenheit") won't trigger any tool because the llm already
-   knows the formula to convert 100 degree Celsius. But the question 2 says to copy the run_agent function from the lesson
-   not the tools of that lesson and the function get_current_time. so i cpoied that too. 
-   
-   and also it uses the tools from question 1 not from the lesson's tools of the run_agent function source.
-   
-2. I assume 1 API call will be enough to answer the quary without calling any tools.  
 
-"""
+# 1. I assume calling run_agent("Convert 100 degrees Celsius to Fahrenheit") won't trigger any tool because the llm already
+#    knows the formula to convert 100 degree Celsius.  
+   
+   
+# 2. I assume 1 API call will be enough to answer the quary without calling any tools.  
+
+
 answer = run_agent("Convert 100 degrees Celsius to Fahrenheit")
 print(answer)
 
-""" 
 
-My prediction was that the model would answer the Celsius conversion directly
-without using a tool. The important result is that celsius_to_fahrenheit is not
-available in the Q2 tools list, so the agent cannot successfully execute that
-tool in Q2.
 
-The second API call only happens if the first response contains a tool call.
+# My prediction was that the model would answer the Celsius conversion directly
+# without using a tool. The important result is that celsius_to_fahrenheit is not
+# available in the Q2 tools list, so the agent cannot successfully execute that
+# tool in Q2.
 
-"""
+# The second API call only happens if the first response contains a tool call.
+
+
 
 
 
@@ -337,22 +335,22 @@ def run_agent(user_prompt: str) -> str:
 response_a = run_agent("What is 37 degrees Celsius in Fahrenheit?")
 print("Response A:", response_a)
 
-"""
-Response A:
-The agent calls the celsius_to_fahrenheit tool because the user is asking
-for a Celsius-to-Fahrenheit conversion. The tool receives 37 as the
-celsius argument and returns 37°C is 98.6°F.
-"""
+
+# Response A:
+# The agent calls the celsius_to_fahrenheit tool because the user is asking
+# for a Celsius-to-Fahrenheit conversion. The tool receives 37 as the
+# celsius argument and returns 37°C is 98.6°F.
+
 
 response_b = run_agent("What is the boiling point of water in plain English?")
 print("Response B:", response_b)
 
-"""
-Response B:
-The agent does not need to call a tool because the question can be
-answered directly from the model's existing knowledge. Therefore,
-no tool call is made and the model answers the question directly.
-"""
+
+# Response B:
+# The agent does not need to call a tool because the question can be
+# answered directly from the model's existing knowledge. Therefore,
+# no tool call is made and the model answers the question directly.
+
 
 
 
@@ -542,33 +540,52 @@ class CsvManager:
         
         return f"Plotted {y} vs {x} as a {plot_type}."
     ##----------------------------Q4-----------------------------------
-    def compute_correlation(self, col1: str, col2: str):
-        """
-        Compute the Pearson correlation between two columns in the loaded DataFrame.
-        Returns the correlation coefficient and p-value.
-        """
-        from scipy.stats import pearsonr
+    
 
+    def compute_correlation(self, col1: str, col2: str) -> dict:
+        """Compute the Pearson correlation coefficient and p-value.
+
+        Args:
+            col1: Name of the first numeric column.
+            col2: Name of the second numeric column.
+
+        Returns:
+            dict: A dictionary containing the column names, Pearson correlation
+                coefficient, and p-value. Returns an error dictionary if no CSV
+                is loaded or the input columns are invalid.
+        """
         if self.df is None:
-            return {"error": "No CSV loaded"}
+            return {"error": "No CSV data is loaded."}
 
         if col1 not in self.df.columns:
-            return {"error": f"Column '{col1}' not found"}
+            return {"error": f"Column not found: {col1}"}
 
         if col2 not in self.df.columns:
-            return {"error": f"Column '{col2}' not found"}
+            return {"error": f"Column not found: {col2}"}
 
-        data = self.df[[col1, col2]].dropna()
+        if not pd.api.types.is_numeric_dtype(self.df[col1]):
+            return {"error": f"Column is not numeric: {col1}"}
 
-        pearson_r, p_value = pearsonr(data[col1], data[col2])
+        if not pd.api.types.is_numeric_dtype(self.df[col2]):
+            return {"error": f"Column is not numeric: {col2}"}
 
-        return {
-            "col1": col1,
-            "col2": col2,
-            "pearson_r": round(float(pearson_r), 4),
-            "p_value": round(float(p_value), 4)
-        }
-    
+        try:
+            r, p = pearsonr(self.df[col1], self.df[col2])
+
+            return {
+                "col1": col1,
+                "col2": col2,
+                "pearson_r": round(r, 4),
+                "p_value": round(p, 4),
+            }
+
+        except Exception as e:
+            return {"error": str(e)}
+
+
+   
+   
+   
 
 print("Class defined")
 
@@ -799,14 +816,14 @@ messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 result = run_agent_cycle(messages, "Load bike_commute.csv and compute the correlation between avg_traffic_density and avg_speed_kmh.")
 print(result)
 
-""" 
-Agent's final response
 
-The correlation between avg_traffic_density and avg_speed_kmh is approximately -0.532. This indicates a moderate negative
-correlation, meaning that as traffic density increases, average speed tends to decrease. The p-value is 0.0, showing this 
-result is statistically significant.
+# Agent's final response
 
-"""
+# The correlation between avg_traffic_density and avg_speed_kmh is approximately -0.532. This indicates a moderate negative
+# correlation, meaning that as traffic density increases, average speed tends to decrease. The p-value is 0.0, showing this 
+# result is statistically significant.
+
+
 
 
 
@@ -863,16 +880,16 @@ def compute_correlation(col1: str, col2: str) -> dict:
 print("\n Question 7")
 print(compute_correlation.description)
 
-"""
-smolagents needs the developer to provide a clear function name, a useful
-docstring describing what the tool does, type hints for the parameters and
-return value, and clear descriptions of each parameter. smolagents uses this
-information to automatically generate the tool description and schema that
-the LLM uses to understand when and how to call the tool.
 
-Unlike Q4, where we manually created the JSON schema, smolagents generates
-the schema from the function's name, type hints, and docstring.
-"""
+# smolagents needs the developer to provide a clear function name, a useful
+# docstring describing what the tool does, type hints for the parameters and
+# return value, and clear descriptions of each parameter. smolagents uses this
+# information to automatically generate the tool description and schema that
+# the LLM uses to understand when and how to call the tool.
+
+# Unlike Q4, where we manually created the JSON schema, smolagents generates
+# the schema from the function's name, type hints, and docstring.
+
 
 
 ##--------------------------------------------------Q8--------------------------------------------------------
@@ -927,7 +944,7 @@ def plot_data(y: str, x: str, plot_type: str = "line") -> str:
         f"{plot_type.title()} plot: {y} vs {x}"
     )
 
-    output_path = "outputs/q8_plot.png"
+    output_path = "assignments_07/outputs/q8_plot.png"
 
     plt.savefig(output_path)
     plt.close()
@@ -979,44 +996,35 @@ print(response_code)
 
 
 
-"""
-Both agents received the same prompt, the same TOOLS list, and the same model.
 
-The ToolCallingAgent called load_csv and then plot_data. The plot_data tool
-itself specifies color="green", so the ToolCallingAgent did not independently
-choose or change the dot color. It simply passed the request to the tool, and
-the tool produced a scatter plot with green dots.
-
-The CodeAgent also produced a scatter plot with green dots. It generated
-Python code and used the available tools to complete the task. It also did
-not independently change the dot color because the plot_data tool controls
-the color.
-
-Therefore, both agents produced the same type of plot with green dots.
-The important difference is how they completed the task: ToolCallingAgent
-uses predefined tools directly, while CodeAgent can generate and execute
-Python code and can use tools as part of that process.
-"""
+# --- Q8 Comparison --- 
+# 
+# The ToolCallingAgent produced a scatter plot of avg_heart_rate versus 
+# duration_min and saved it to assignments_07/outputs/q8_plot.png. 
+# It changed the dot color to green. # # The CodeAgent also produced a scatter plot of avg_heart_rate versus 
+# duration_min and saved it to assignments_07/outputs/q8_plot.png. # It also changed the dot color to green. 
+#  Both agents successfully followed the request and produced the same type 
+# of scatter plot with green dots. The main difference was how they worked: 
+# the ToolCallingAgent called the plotting tools directly, while the # CodeAgent generated code that called the tools.
 
 
 ###---------------------------------------------------Q9-----------------------------------------------------
 
-"""
-1. A ToolCallingAgent would be better for a task like checking the weather
-or getting the current time. We can provide a specific tool that performs
-the task, and the agent only needs to decide when to call that tool. This
-makes the behavior more controlled and predictable.
 
-2. The main risk with a CodeAgent is that it generates and executes code.
-Because the generated code actually runs, incorrect or unexpected code
-could perform unwanted actions if the agent has access to files, data,
-the operating system, or other resources. For example, generated code
-could modify files or data or perform operations that the developer did
-not intend.
+# 1. A ToolCallingAgent would be better for a task like checking the weather
+# or getting the current time. We can provide a specific tool that performs
+# the task, and the agent only needs to decide when to call that tool. This
+# makes the behavior more controlled and predictable.
 
-The ToolCallingAgent is more restricted because it can only call the
-predefined tools that we give it. CodeAgent provides more flexibility,
-but that ability to generate and execute code also creates additional
-security and safety risks.
+# 2. The main risk with a CodeAgent is that it generates and executes code.
+# Because the generated code actually runs, incorrect or unexpected code
+# could perform unwanted actions if the agent has access to files, data,
+# the operating system, or other resources. For example, generated code
+# could modify files or data or perform operations that the developer did
+# not intend.
 
-"""
+# The ToolCallingAgent is more restricted because it can only call the
+# predefined tools that we give it. CodeAgent provides more flexibility,
+# but that ability to generate and execute code also creates additional
+# security and safety risks.
+
