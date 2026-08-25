@@ -31,45 +31,52 @@ Answer: For this scenario,i would choose  horizontal scaling so the traffic can 
 
 
 """
-
 ##-------------------------------------------------Cloud Concepts Question 3--------------------------------------------------
 
-""" 
+"""
 
 Gmail : Gmail is SaaS (Software as a Service) because it is a software application that we use over the internet and
-        does not require any installation or maintenance by the user.
+does not require any installation or maintenance by the user. The cloud provider manages the application,
+servers, storage, and infrastructure, while the user is responsible for managing their account and the data they use.
 
-Azure Virtual Machines : Azure Virtual Machines is IaaS (Infrastructure as a Service) because it provides virtualized 
-                        computing resources over the internet, allowing users to run their own applications and operating systems 
-                        without managing the underlying hardware.
+Azure Virtual Machines : Azure Virtual Machines is IaaS (Infrastructure as a Service) because it provides virtualized
+computing resources over the internet, allowing users to run their own applications and operating systems
+without managing the underlying hardware. The cloud provider manages the physical servers, networking, and
+virtualization, while the user is responsible for managing the operating system, applications, and data.
 
-AWS S3 (Simple Storage Service) : AWS S3 is BaaS (Backend as a Service) because it provides cloud storage and data management services,
-                                 allowing developers to give their app a backend without managing the underlying infrastructure.
+AWS S3 (Simple Storage Service) : AWS S3 is Object Storage because it provides cloud-based storage for storing and managing
+objects such as files and data. The cloud provider manages the storage infrastructure, hardware,
+and availability, while the user is responsible for managing their stored data, objects, and access permissions.
 
 GitHub Codespaces : GitHub Codespaces is PaaS (Platform as a Service) because it provides a cloud-based development environment
-                    that allows developers to write, build, and test code without managing the underlying infrastructure.
+that allows developers to write, build, and test code without managing the underlying infrastructure.
+The cloud provider manages the development environment, servers, and infrastructure, while the developer
+is responsible for managing their code, applications, and development configuration.
 
-Snowflake : Snowflakes is SaaS (Software as a Service) because it is a cloud based and it gives services like pre-wire the pieces for you, 
-           optimizing specifically for data and analytics workloads.
+Snowflake : Snowflake is a Managed Data Platform because it provides a cloud-based platform that pre-wires the pieces for you,
+optimizing specifically for data and analytics workloads. The provider manages the underlying infrastructure,
+database platform, and scaling, while the user is responsible for managing their data, queries, and access controls.
 
+Supabase : Supabase is open-source BaaS (Backend as a Service) because it provides backend services for developers
+to build and deploy applications without managing the underlying servers or databases. The provider manages
+the backend infrastructure and services, while the developer is responsible for managing their application,
+data, and how the backend services are used.
 
-Supabase : Supabase is open-source  BaaS (Backend as a Service) because it provides a backend infrastructure for developers 
-           to build and deploy applications without managing the underlying servers or databases.
+IaaS : IaaS stands for Infrastructure as a Service, where the cloud service provider gives the user access to a virtualized
+computing infrastructure. The cloud service provider manages the physical hardware, networking, and virtualization,
+while the user is responsible for managing the operating system, applications, and data.
+Eg: Google Cloud Compute Engine.
 
-           
-IaaS : Iaas stands for Infrastructure as a Service, Where the cloud service provider gives the user access to a virtualized computing infrastructure.
-        where the user pay what they use and don't need to manage the underlying hardware.
-        Eg: Google Cloud Compute Engine.
+PaaS : PaaS stands for Platform as a Service, where the cloud service provider gives the user a platform where they
+can write, run, test, and deploy their applications without managing the underlying infrastructure. The cloud
+provider manages the infrastructure and platform, while the developer is responsible for managing their code,
+applications, and data.
+Eg: GitHub Codespaces.
 
-
-PaaS : PaaS stands for Platform as a Service, where the cloud service provider gives the user a platform where the 
-       can write, run, test and deploy their applications without managing the underlying infrastructure.         
-        Eg: GitHub Codespaces.
-
-
-SaaS : SaaS stands for Software as a Service, where the cloud service provider gives the user access to complete software 
-       applications over the internet.
-        Eg: Gmail.
+SaaS : SaaS stands for Software as a Service, where the cloud service provider gives the user access to complete software
+applications over the internet. The cloud provider manages the application, infrastructure, updates, and maintenance,
+while the user is responsible for managing their account, settings, and the data they provide.
+Eg: Gmail.
 
 """
 
@@ -88,11 +95,13 @@ The tradeoff is its less flexible and the cost can be higher.
 
 ##-------------------------------------------------Cloud Concepts Question 5--------------------------------------------------
 
-"""  
+"""
 
-First situation where the dataset fits comfortably on a single machine and do not have massive compute demands.
+First situation where the dataset fits comfortably on a single machine and does not have massive compute demands,
+so using the cloud may not be necessary.
 
-Second where the user is setting up an initial prototype.
+Second situation where the user is setting up an initial prototype,so using a local machine may be simpler and
+more cost-effective than using the cloud.
 
 """
 
@@ -138,14 +147,15 @@ Reflection : It suggests that just choosing a service provider based on populari
 
 ##------------------------------------------------Cloud Landscape Question 3-------------------------------------------------------
 
-""" 
-1. Object storage offerred by AWS S3, GCP Cloud Storage.
+"""
 
-2. ML platform offered by AWS SageMaker, GCP Vertex AI.
+Object storage offered by AWS S3, GCP Cloud Storage.
 
-3. Serverless compute offered by AWS Lambda, GCP Cloud Functions.
+GPU compute / VM-style service offered by AWS EC2 with GPU instances, GCP Compute Engine with GPU instances.
 
-4. LLM API offered by AWS Bedrock, GCP Vertex AI
+Serverless compute offered by AWS Lambda, GCP Cloud Functions.
+
+LLM API offered by AWS Bedrock, GCP Vertex AI.
 
 """
 
