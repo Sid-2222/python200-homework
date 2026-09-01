@@ -3,11 +3,10 @@ import os
 from dotenv import load_dotenv
 from supabase import create_client
 import supabase
-##------------------------------------------Part 1: Warmup---------------------------------------------##
+#------------------------------------------Part 1: Warmup---------------------------------------------#
 
-##-----------------------------------------Supabase Connection-------------------------------------##
-
-##-----------------------------------------Connection Question 1-------------------------------------##
+#-----------------------------------------Supabase Connection-------------------------------------#
+#-----------------------------------------Connection Question 1-------------------------------------#
 
 
 """ 
@@ -25,7 +24,7 @@ import supabase
 """
 
 
-##-----------------------------------------Connection Question 2-------------------------------------##
+#-----------------------------------------Connection Question 2-------------------------------------#
 
 
 def get_client():
@@ -33,10 +32,15 @@ def get_client():
 
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_KEY")
-    return create_client(url, key)
 
-get_client()
-##-----------------------------------------Connection Question 3-------------------------------------##
+    if not url:
+        raise ValueError("SUPABASE_URL environment variable is missing.")
+
+    if not key:
+        raise ValueError("SUPABASE_KEY environment variable is missing.")
+
+    return create_client(url, key)
+#-----------------------------------------Connection Question 3-------------------------------------#
 
 
 """ 
@@ -50,11 +54,11 @@ I want to have it enabled is a real world application where the data are senseti
 
 """
 
-##-----------------------------------------supabase-py CRUD-------------------------------------##
+#-----------------------------------------supabase-py CRUD-------------------------------------#
 
-##-----------------------------------------CRUD Question 1--------------------------------------##
+#-----------------------------------------CRUD Question 1--------------------------------------#
 
-supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+supabase = get_client()
 def insert_test_record(supabase):
     row = {
         "date": date.today().isoformat(),
@@ -66,8 +70,8 @@ def insert_test_record(supabase):
 
     return supabase.table("weather_raw").insert(row).execute()
 
-#result = insert_test_record(supabase)
-#print(f"Inserted record: {result.data}")
+result = insert_test_record(supabase)
+print(f"Inserted record: {result.data}")
 
 # If I ran this function twice, the second insert would fail becausethe date column is the PRIMARY KEY,
 # so today's date can only appear once.
@@ -76,7 +80,7 @@ def insert_test_record(supabase):
 # supabase.table("weather_raw").upsert(row, on_conflict="date").execute()
 
 
-##-----------------------------------------CRUD Question 2--------------------------------------##
+#-----------------------------------------CRUD Question 2--------------------------------------#
 
 
 def get_records_by_date_range(supabase, start, end):
@@ -99,7 +103,7 @@ print(f"Records from your choosen dates:\n")
 print(result)
 
 
-##-----------------------------------------CRUD Question 3--------------------------------------##
+#-----------------------------------------CRUD Question 3--------------------------------------#
 
 
 # insert() adds new rows to the table. If a row already exists with the ame primary key, 
@@ -141,9 +145,9 @@ records = [
 safe_upsert(supabase, records)
 
 
-##-----------------------------------------Idempotency--------------------------------------##
+#-----------------------------------------Idempotency--------------------------------------#
 
-##---------------------------------------Idempotency Question 1--------------------------------------##
+#---------------------------------------Idempotency Question 1--------------------------------------#
 
 
 """

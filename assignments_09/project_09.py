@@ -75,4 +75,13 @@ latest = (supabase.table("weather_raw").select("date").order("date", desc=True).
 print(f"\nLatest date: {latest.data[0]['date']}")
 
 july_4 = (supabase.table("weather_raw").select("*").eq("date", "2023-07-04").execute())
-print(f"\n2023-07-04: {july_4.data[0]}")
+
+if july_4.data:
+    print(f"\n2023-07-04: {july_4.data[0]}")
+else:
+    nearest = (supabase.table("weather_raw").select("*").order("date", desc=False).limit(1).execute())
+
+    if nearest.data:
+        print(f"\n2023-07-04 not found. Nearest available date: {nearest.data[0]}")
+    else:
+        print("\nweather_raw is empty.")
