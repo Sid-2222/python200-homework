@@ -1,3 +1,6 @@
+# Video Link
+# https://www.youtube.com/watch?v=hc_bLIAhaJ0
+
 import requests
 import os
 from dotenv import load_dotenv
