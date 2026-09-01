@@ -5,6 +5,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from supabase import create_client
+from datetime import date
 
 load_dotenv()
 
@@ -74,14 +75,54 @@ print(f"\nEarliest date: {earliest.data[0]['date']}")
 latest = (supabase.table("weather_raw").select("date").order("date", desc=True).limit(1).execute())
 print(f"\nLatest date: {latest.data[0]['date']}")
 
-july_4 = (supabase.table("weather_raw").select("*").eq("date", "2023-07-04").execute())
+july_4 = (
+    supabase.table("weather_raw")
+    .select("*")
+    .eq("date", "2023-07-04")
+    .execute()
+)
 
 if july_4.data:
     print(f"\n2023-07-04: {july_4.data[0]}")
 else:
-    nearest = (supabase.table("weather_raw").select("*").order("date", desc=False).limit(1).execute())
+    before = (
+        supabase.table("weather_raw")
+        .select("*")
+        .lt("date", "2023-07-04")
+        .order("date", desc=True)
+        .limit(1)
+        .execute()
+    )
 
-    if nearest.data:
-        print(f"\n2023-07-04 not found. Nearest available date: {nearest.data[0]}")
+    after = (
+        supabase.table("weather_raw")
+        .select("*")
+        .gt("date", "2023-07-04")
+        .order("date", desc=False)
+        .limit(1)
+        .execute()
+    )
+
+    if before.data and after.data:
+        target = date.fromisoformat("2023-07-04")
+        before_date = date.fromisoformat(before.data[0]["date"])
+        after_date = date.fromisoformat(after.data[0]["date"])
+
+        if (target - before_date) <= (after_date - target):
+            nearest = before.data[0]
+        else:
+            nearest = after.data[0]
+
+        print(f"\n2023-07-04 not found.")
+        print(f"Nearest date: {nearest}")
+
+    elif before.data:
+        print(f"\n2023-07-04 not found.")
+        print(f"Nearest date: {before.data[0]}")
+
+    elif after.data:
+        print(f"\n2023-07-04 not found.")
+        print(f"Nearest date: {after.data[0]}")
+
     else:
-        print("\nweather_raw is empty.")
+        print("\nNo records found in weather_raw.")

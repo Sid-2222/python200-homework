@@ -9,19 +9,19 @@ import supabase
 #-----------------------------------------Connection Question 1-------------------------------------#
 
 
-""" 
-    The two pieces of information supabase-py needs to connect to project are SUPABASE_URL and SUPABASE_KEY.
 
-    To get the SUPABASE_URL/PROJECT_URL, goto the peoject dashboard then under the project name there will be the
-    url and can copy it from the dropdown.
+    # The two pieces of information supabase-py needs to connect to project are SUPABASE_URL and SUPABASE_KEY.
 
-    To get the SUPABASE_KEY , goto the Project Dashboard -> Project Settings -> API Keys -> Legacy anon, service_role API keys
-    There the key named anon public and be able to copy it.
+    # To get the SUPABASE_URL/PROJECT_URL, goto the peoject dashboard then under the project name there will be the
+    # url and can copy it from the dropdown.
 
-    We should never be hard code those keys in a Python script because its a security risk. and is soneone gets it can access the
-    database.
+    # To get the SUPABASE_KEY , goto the Project Dashboard -> Project Settings -> API Keys -> Legacy anon, service_role API keys
+    # There the key named anon public and be able to copy it.
 
-"""
+    # We should never be hard code those keys in a Python script because its a security risk. and is someone gets it can access the
+    # database.
+
+
 
 
 #-----------------------------------------Connection Question 2-------------------------------------#
@@ -40,19 +40,19 @@ def get_client():
         raise ValueError("SUPABASE_KEY environment variable is missing.")
 
     return create_client(url, key)
+
 #-----------------------------------------Connection Question 3-------------------------------------#
 
 
-""" 
-Row Level Security (RLS) is a security feature that controls which row a user can access or modify in a database.
 
-For this course I disabled it because its a learning environment and we want to focus on the ELT process.So we are skipping
-the cpmolexity of authentication and authorization.
+# Row Level Security (RLS) is a security feature that controls which row a user can access or modify in a database.
 
-I want to have it enabled is a real world application where the data are sensetive like medical records or financial data.
+# For this course I disabled it because its a learning environment and we want to focus on the ELT process.So we are skipping
+# the cpmolexity of authentication and authorization.
+
+# I want to have it enabled is a real world application where the data are sensetive like medical records or financial data.
 
 
-"""
 
 #-----------------------------------------supabase-py CRUD-------------------------------------#
 
@@ -73,11 +73,18 @@ def insert_test_record(supabase):
 result = insert_test_record(supabase)
 print(f"Inserted record: {result.data}")
 
-# If I ran this function twice, the second insert would fail becausethe date column is the PRIMARY KEY,
-# so today's date can only appear once.
-# To make the function safe to run multiple times, I would use upsert()
-# instead of insert(). With date as the conflict column.
-# supabase.table("weather_raw").upsert(row, on_conflict="date").execute()
+
+# If I ran insert_test_record(supabase) twice on the same day,
+# the second call would fail because the date column is the primary key
+# and today's date would already exist in the table.
+#
+# To make the call safe to run multiple times, I would change the
+# insert() call inside insert_test_record() to upsert() with date as
+# the conflict column:
+#
+# return supabase.table("weather_raw").upsert(
+#     row, on_conflict="date"
+# ).execute()
 
 
 #-----------------------------------------CRUD Question 2--------------------------------------#
@@ -94,10 +101,13 @@ def get_records_by_date_range(supabase, start, end):
 
     return response.data
 
+
+today = date.today().isoformat()
+
 result = get_records_by_date_range(
     supabase,
-    "2023-12-31",
-    "2026-08-31"
+    today,
+    today
 )
 print(f"Records from your choosen dates:\n")
 print(result)
@@ -122,7 +132,7 @@ def safe_upsert(supabase, records):
         .execute()
     )
 
-    print(f"Rows affected: {len(response.data)}")
+    print(f"Rows affected: {len(records)}")
     return response.data
 
 records = [
@@ -150,15 +160,14 @@ safe_upsert(supabase, records)
 #---------------------------------------Idempotency Question 1--------------------------------------#
 
 
-"""
-
-Idempotency is important in a data pipeline because we may need to run the same script more than once, 
-especially if it crashes or needs to be restarted. An idempotent pipeline makes sure that running it again does
-not create duplicate or incorrect data.
-
-For example, A script is loading weather records for 30 days. It successfully inserts the first 15 days, but then crashes.
-If we restart the script and it tries to insert those same 15 days again,it could create duplicate records or 
-cause primary-key errors. Using upsert() makes the pipeline safer because existing records can be updated instead of inserted again.
 
 
-"""
+# Idempotency is important in a data pipeline because we may need to run the same script more than once, 
+# especially if it crashes or needs to be restarted. An idempotent pipeline makes sure that running it again does
+# not create duplicate or incorrect data.
+
+# For example, A script is loading weather records for 30 days. It successfully inserts the first 15 days, but then crashes.
+# If we restart the script and it tries to insert those same 15 days again,it could create duplicate records or 
+# cause primary-key errors. Using upsert() makes the pipeline safer because existing records can be updated instead of inserted again.
+
+
