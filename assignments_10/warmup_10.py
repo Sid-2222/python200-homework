@@ -4,18 +4,18 @@
 #----------------------------------------------ML/LLM Question 1-----------------------------------------------#
 
 """ 
-In this week's pipeline our ML classifier takes 4 input and it's already trained on weather data. After taking the input it
-predicts whether it will rain or not. It gives 0,1.
+In this week's pipeline our ML classifier takes 4 input and it's already trained on weather data.
+It produces a 0 or 1, which represents whether the weather is good for running or not. 
 
-LLM using the models prediction produce one sentence output describing the day condition for running.
+LLM using the models prediction produce a natural-language recommendation that explains the result in a human-readable way.
 
-The ML classifier can only generate numbers not a human readable sentence. So we use the ML for the prediction and
-then using the prediction we generate a human readable sentence using the LLM.
+The ML classifier is used for the binary prediction because it is trained to make consistent and predictable classifications.
+The LLM is used for the recommendation because it is better at generating natural-language responses.
 
 If we swap the order the pipeline would not work as well. The LLM would be able to generate numbers but its output may be less consistent,
 harder to validate, more expensive, and less predictable than our ML classifier.
 
-But, the ML classifier is not able to generate human readable sentences. It only can generate numbers.
+The ML model also cannot write a human-readable recommendation because its output is the classification, not natural language. 
 
 """
 
@@ -49,7 +49,7 @@ I would use deterministic code because the result can be calculated using a math
 #----------------------------------------------ML/LLM Question 3-------------------------------------------------#
 
 """
-Incremental processing means the pipeline only processes new or changed records instead of processing everything again.
+Incremental processing means the pipeline only processes new or changed records avoiding re-processing already enriched rows for correctness and cost.
 
 This is important because it saves time and reduces cost. If the script processed all 365 records every time, it would do the same work again,
 which would make the pipeline slower and more expensive.
@@ -75,7 +75,7 @@ ALTERNATIVE_SYSTEM_PROMPT = (
 )
 
 
-In the validation logic, I need to change the lenth check to  "if len(sentences) > 3" because the prompt
+In the validation logic, I need to change the lenth check to  "if len(sentences) > 2" because the prompt
 is asking no more than two sentences.
 
 """

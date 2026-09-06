@@ -1,4 +1,3 @@
-# week 10 video
 # https://www.youtube.com/watch?v=MNaGZt1EEa8
 
 import joblib
@@ -252,14 +251,12 @@ print(f"Good-for-running days in weather_enriched: {good_count.count}")
 """
 REFLECTION
 
-The ML classifier was not trained on Charlotte, NC data. I took the city Ventura, CA.
-I consider the predictions to be accurate because here the weather seems match the modles prediction.
-
+I used weather data from Ventura, CA. I think the predictions could be somewhat accurate, but maybe not
+completely because the model was trained on weather data from Charlotte, NC, which has a different climate.
 The LLM recommendation is additive not a replacement for the ML classifier. The classifier determines
 the good_for_running label and confidence score, while the LLM turns the weather information and model
 output into a human-readable recommendation. This separation means the ML model remains responsible for 
 the classification while the LLM provides a more useful explanation for the user.
-
 If the pipeline processed 50,000 records instead of 365, my main concerns would be API cost,and latency. 
 It took around 40 seconds to process 50 records so 50,000 will take around 11 hours. A separate LLM API request 
 for every record could become expensive. I would handle this by processing the records in smaller groups and making 
