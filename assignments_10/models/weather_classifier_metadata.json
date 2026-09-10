@@ -1,0 +1,20 @@
+{
+    "python_version": "3.13.1 (tags/v3.13.1:0671451, Dec  3 2024, 19:06:28) [MSC v.1942 64 bit (AMD64)]",
+    "scikit_learn_version": "1.9.0",
+    "feature_names": [
+        "temperature_2m_max",
+        "temperature_2m_min",
+        "precipitation_sum",
+        "wind_speed_10m_max"
+    ],
+    "best_hyperparameters": {
+        "clf__C": 100.0
+    },
+    "test_auc": 0.9945054945054945,
+    "location": {
+        "city": "Los Angeles",
+        "latitude": 34.052235,
+        "longitude": -118.243683
+    },
+    "label_description": "good_for_running = 1 when temperature, precipitation, and wind conditions met the selected running criteria. Otherwise, the label was set to 0."
+}
